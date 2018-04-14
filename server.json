@@ -1,0 +1,19 @@
+{
+	"name": "WeatherFlowPoly",
+	"docs": "http;//www.bobsplace.com/release/WFNodeserver",
+	"type": "node",
+	"executable": "weatherflow.js",
+	"install": "install.sh",
+	"description": "Add WeatherFlow weather data to the ISY994",
+	"notice": "see http://www.weatherflow.com for more information",
+	"credits": [
+		{
+			"title": "WeatherFlow: A node.js library for WeatherFlow",
+			"author": "Bob Paauwe",
+			"version": "0.0.1",
+			"date": "April 12, 2018",
+			"source": "https://github.com/bpaauwe/WeatherFlow",
+			"license": "TBD"
+		}
+	]
+}
