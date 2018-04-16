@@ -1,2 +1,4 @@
 zip
 node
+mqtt
+fs-extra
