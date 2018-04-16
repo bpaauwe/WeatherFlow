@@ -102,6 +102,7 @@ module.exports = class WFUDP {
 		this.airData['serial_number'] = j.serial_number;
 		this.airData['hub_sn'] = j.hub_sn;
 		this.airData['firmware_revision'] = j.firmware_revision;
+		this.airData['type'] = j.type;
 		this.airData['epoch'] = j.obs[0][0];
 		this.airData['pressure'] = {
 			value: (Number(j.obs[0][1]) * 0.02952998751).toFixed(3), uom: 23 };
@@ -151,6 +152,7 @@ module.exports = class WFUDP {
 		this.skyData['serial_number'] = j.serial_number;
 		this.skyData['hub_sn'] = j.hub_sn;
 		this.skyData['firmware_revision'] = j.firmware_revision;
+		this.skyData['type'] = j.type;
 		this.skyData['epoch'] = j.obs[0][0];
 		this.skyData['illuminance'] = { value: Number(j.obs[0][1]), uom: 36 };
 		this.skyData['uv'] = { value: Number(j.obs[0][2]), uom: 71 };

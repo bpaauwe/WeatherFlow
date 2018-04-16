@@ -99,10 +99,34 @@ em.on('configured', function(Poly) {
 		AddNode(nodes[i], Poly);
 	}
 
+	// Set the proper node type WF_Air vs. WF_AirSI based
+	// on config.  
+	// TODO: Polyglot doesn't support changing node definitions so
+	//       the only way to make this work would be to delete the
+	//       node and re-create with the new definition. Not a good
+	//       solution.
+	for(var i = 0; i < nodes.length; i++) {
+		log('node = ' + JSON.stringify(nodes[i]));
+		if (Poly.Units.toLowerCase() == 'metric') {
+			if (nodes[i].nodedef == 'WF_SkySI')
+				log('Switching ' + nodes[i].name + '  definitions to metric');
+
+			if (nodes[i].nodedef == 'WF_AirSI')
+				log('Switching ' + nodes[i].name + '  definitions to metric');
+		} else {
+			if (nodes[i].nodedef == 'WF_Sky')
+				log('Switching ' + nodes[i].name + ' definitions to imperial');
+
+			if (nodes[i].nodedef == 'WF_Air')
+				log('Switching ' + nodes[i].name + ' definitions to imperial');
+		}
+	}
+
 	// Start UDP listener for WeatherFlow data
 	var udp = new WFUDP(log);
 	udp.Air = doAir;
 	udp.Sky = doSky;
+	udp.Elevation = Poly.Elevation;
 	udp.Start();
 });
 
@@ -121,8 +145,6 @@ function AddNode(node, Poly) {
 		log('AddNode error: Poly is undefined.');
 
 	nodelist[sn].Poly = Poly;
-	//nodelist[sn].Topic = topicInput;
-	//nodelist[sn].Profile = profileNum;
 
 	var drvs = new Array();
 	for (var key in node.drivers) {
@@ -136,14 +158,54 @@ function AddNode(node, Poly) {
 	nodelist[sn].Drivers = drvs;
 }
 
+function c_2_f(c) {
+	return ((c * 1.8) + 32).toFixed(1);
+}
+
+function kph_2_mph(kph) {
+	return (kph / 1.609344).toFixed(1);
+}
+
+function km_2_miles(km) {
+	return (km / 1.609344).toFixed(1);
+}
+
+function mm_2_inch(mm) {
+	return (mm * 0.03937).toFixed(3);
+}
+
+
 // convert the data values from metric to imperial
 function toImperial(data) {
+	if (data.type == 'obs_air') {
+		// convert temp and distance
+		data.temperature.value = c_2_f(data.temperature.value);
+		data.temperature.uom = 17;
+		data.dewpoint.value =  c_2_f(data.dewpoint.value);
+		data.dewpoint.uom = 17;
+		data.apparent_temp.value =  c_2_f(data.apparent_temp.value);
+		data.apparent_temp.uom = 17;
+		data.strike_distance.value = km_2_miles(data.strike_distance.value);
+		data.strike_distance.uom = 0;
+	} else if (dta.type == 'obs_sky') {
+		// convert speed, rain
+		data.wind_speed.value = kph_2_mph(data.wind_speed.value);
+		data.wind_speed.uom = 48;
+		data.gust_speed.value = kph_2_mph(data.gust_speed.value);
+		data.gust_speed.uom = 48;
+		data.lull_speed.value = kph_2_mph(data.lull_speed.value);
+		data.lull_speed.uom = 48;
+		data.rain_rate.value = mm_2_inch(data.rain_rate.value);
+		data.rain_rate.uom = 24;
+		data.rain_daily.value = mm_2_inch(data.rain_daily.value);
+		data.rain_daily.uom = 105;
+	}
 }
 
 function doAir(j) {
 	console.log('In the air observation handler');
-	if (Poly.Units != 'metric')
-		j = toImperial(j);
+	if (Poly.Units.toLowerCase() != 'metric')
+		toImperial(j);
 
 	if (nodelist[j.serial_number] === undefined) {
 		log('serial number ' + j.serial_number + ' not found');
@@ -167,8 +229,6 @@ function doAir(j) {
 		log('Adding node for serial number ' + j.serial_number);
 		nodelist[j.serial_number].addNode();
 	} else {
-		log('GV6 = ' + j.dewpoint.value);
-		log('GV7 = ' + j.apparent_temp.value);
 		// Update node drivers 
 		nodelist[j.serial_number].setDriver("GV1", j.temperature.value);
 		nodelist[j.serial_number].setDriver("GV2", j.humidity.value);
