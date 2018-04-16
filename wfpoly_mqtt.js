@@ -10,6 +10,8 @@ module.exports = class PolyMQTT {
 		this.client = null;
 		this.topic = 'udi/polyglot/ns/' + this.profile;
 		this.log = log;
+		this.customParams = null;
+		this.newParams = null;
 	}
 
 	get ConfiguredNodes() {
@@ -68,16 +70,26 @@ module.exports = class PolyMQTT {
 		});
 
 		//this.client.on('message', this.messagehandler);
-		this.client.on('message', function(topic, message) {
+		//this.client.on('message', function(topic, message) {
+		this.client.on('message', (topic, message) => {
 			//_this.log("Received message from poly");
 			if (topic == 'udi/polyglot/connections/polyglot') {
 				console.log(topic + ' sent ' + message);
 			} else if (topic == 'udi/polyglot/connections/' + _this.profile) {
 				console.log(topic + ' sent ' + message);
 			} else if (topic == _this.topic) {
-				_this.ProcessPolyMsg(_this, message);
+				this.ProcessPolyMsg(message);
 			} else {
 				console.log(topic + ' unknown ' + message);
+			}
+
+			if (JSON.stringify(this.newParams) !== JSON.stringify(this.customParams)) {
+				var mesg = { 'customparams': this.newParams,
+							 'node': this.profile };
+				// Save the params ??
+				this.log("Saving updated custom parameters.");
+				this.client.publish(this.topic, JSON.stringify(mesg), false);
+				this.customParams = this.newParams;
 			}
 		});
 
@@ -99,41 +111,40 @@ module.exports = class PolyMQTT {
 
 	// Handle all the messages that come in over the mqtt 
 	// connection.
-	ProcessPolyMsg(_this, message) {
+	ProcessPolyMsg(message) {
 		var msg = JSON.parse(message);
 
+		//this.log("Entered ProcessPolyMsg + " + JSON.stringify(msg));
 		if (msg.node == 'polyglot') {
 			if (msg.config !== undefined) {
-				_this.config = msg.config;
+				this.config = msg.config;
 
-				_this.log("We have a config from Polyglot");
+				this.log("We have a config from Polyglot");
 
-				_this.ready.emit('configured', _this);
+				this.ready.emit('configured', this);
 
 				var config = msg.config;
-				_this.log('ISY version: ' + config.isyVersion);
-				_this.log('Name       : ' + config.name);
-				if (config.customParams.Units !== undefined) {
-					_this.log('Using units: ' + config.customParams.Units);
+				this.log('ISY version: ' + config.isyVersion);
+				this.log('Name       : ' + config.name);
+
+				this.customParams = config.customParams;
+				this.newParams = Object.assign({}, this.customParams);
+
+				if (this.customParams.Units !== undefined) {
+					this.log('  Using units: ' + this.customParams.Units);
+				} else {
+					this.newParams['Units'] = 'metric';
 				}
-				console.log('config =');
-				console.log(JSON.stringify(config));
-
-				// Build the list of known nodes (array newNodes array nodes)
-				// What's the difference between the newNodes list and the
-				// nodes list?  They seem the same.
-				var newNodes = config.newNodes;
-				var nodes = config.nodes;
-
-				//console.log('newnodes: ' + JSON.stringify(newNodes));
-				for(var i = 0; i < newNodes.length; i++) {
-					// Use the configuredNodes property to get this
-					//AddNode(newNodes[i]);
+				if (this.customParams.Elevation !== undefined) {
+					this.log('  Elevation  : ' + this.customParams.Elevation);
+				} else {
+					this.newParams['Elevation'] = "0";
 				}
 
-				//console.log('nodes   : ' + JSON.stringify(nodes));
-				for(var i = 0; i < nodes.length; i++) {
-				}
+				this.log('customParams = ' + JSON.stringify(this.customParams));
+				this.log('newParams    = ' + JSON.stringify(this.newParams));
+				//_this.log('config =');
+				//_this.log(JSON.stringify(config));
 
 				// Is there other config data that we should be 
 				// looking at or saving?
@@ -148,18 +159,18 @@ module.exports = class PolyMQTT {
 				} else if (msg.result !== undefined) {
 					if (msg.result.status !== undefined) {
 						if (!msg.result.status.success) {
-							_this.log('Error: ' + msg.result.status.reason);
+							this.log('Error: ' + msg.result.status.reason);
 						} else {
-							_this.log('Sucess: ' + msg.result.status.reason);
+							this.log('Sucess: ' + msg.result.status.reason);
 						}
 					} else if (msg.result.addnode !== undefined) {
 						if (!msg.result.addnode.success) {
-							_this.log('Error: ' + msg.result.addnode.reason);
+							this.log('Error: ' + msg.result.addnode.reason);
 						} else {
-							_this.log('Sucess: ' + msg.result.addnode.reason);
+							this.log('Sucess: ' + msg.result.addnode.reason);
 						}
 					} else {
-						_this.log('Result: ' + JSON.stringify(msg.result));
+						this.log('Result: ' + JSON.stringify(msg.result));
 					}
 				} else if (msg.status !== undefined) {
 				} else if (msg.shortPoll !== undefined) {

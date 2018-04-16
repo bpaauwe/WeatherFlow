@@ -29,6 +29,7 @@ var mqttHost = 'mqtts://192.168.92.100';
 var mqttPort = 1883;
 var em = new events.EventEmitter();
 var Poly;
+var udp_monitor;
 
 
 process.stdin.setEncoding('utf-8');
@@ -135,11 +136,12 @@ em.on('configured', function(Poly) {
 	}
 
 	// Start UDP listener for WeatherFlow data
-	var udp = new WFUDP(log);
-	udp.Air = doAir;
-	udp.Sky = doSky;
-	udp.Elevation = Poly.Elevation;
-	udp.Start();
+	if (udp_monitor === undefined)
+		udp_monitor = new WFUDP(log);
+	udp_monitor.Air = doAir;
+	udp_monitor.Sky = doSky;
+	udp_monitor.Elevation = Poly.Elevation;
+	udp_monitor.Start();
 });
 
 
