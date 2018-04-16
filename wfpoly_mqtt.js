@@ -22,6 +22,14 @@ module.exports = class PolyMQTT {
 		return new Array();
 	}
 
+	get Units() {
+		if (this.config.customParams.Units !== undefined) {
+			return this.config.customParams.Units;
+		}
+		return 'metric';
+	}
+
+
 	Start() {
 		var options = {
 			port: this.port,
@@ -55,7 +63,7 @@ module.exports = class PolyMQTT {
 
 		//this.client.on('message', this.messagehandler);
 		this.client.on('message', function(topic, message) {
-			_this.log("Received message from poly");
+			//_this.log("Received message from poly");
 			if (topic == 'udi/polyglot/connections/polyglot') {
 				console.log(topic + ' sent ' + message);
 			} else if (topic == 'udi/polyglot/connections/' + _this.profile) {
@@ -134,18 +142,18 @@ module.exports = class PolyMQTT {
 				} else if (msg.result !== undefined) {
 					if (msg.result.status !== undefined) {
 						if (!msg.result.status.success) {
-							log('Error: ' + msg.result.status.reason);
+							_this.log('Error: ' + msg.result.status.reason);
 						} else {
-							log('Sucess: ' + msg.result.status.reason);
+							_this.log('Sucess: ' + msg.result.status.reason);
 						}
 					} else if (msg.result.addnode !== undefined) {
 						if (!msg.result.addnode.success) {
-							log('Error: ' + msg.result.addnode.reason);
+							_this.log('Error: ' + msg.result.addnode.reason);
 						} else {
-							log('Sucess: ' + msg.result.addnode.reason);
+							_this.log('Sucess: ' + msg.result.addnode.reason);
 						}
 					} else {
-						log('Result: ' + JSON.stringify(msg.result));
+						_this.log('Result: ' + JSON.stringify(msg.result));
 					}
 				} else if (msg.status !== undefined) {
 				} else if (msg.shortPoll !== undefined) {

@@ -76,7 +76,7 @@ log('stdin: ' + data);
 
 _this = this;
 em.on('Ready', GotInput);
-function GotInput(Poly) {
+function GotInput(aPoly) {
 	console.log('We now have all our input, start mqtt here??');
 	log('We now have all our input, start mqtt here??');
 
@@ -100,7 +100,7 @@ em.on('configured', function(Poly) {
 	}
 
 	// Start UDP listener for WeatherFlow data
-	var udp = new WFUDP();
+	var udp = new WFUDP(log);
 	udp.Air = doAir;
 	udp.Sky = doSky;
 	udp.Start();
@@ -136,89 +136,90 @@ function AddNode(node, Poly) {
 	nodelist[sn].Drivers = drvs;
 }
 
+// convert the data values from metric to imperial
+function toImperial(data) {
+}
+
 function doAir(j) {
 	console.log('In the air observation handler');
-	var inhg = (Number(j.obs[0][1]) * 0.02952998751).toFixed(3);
-	log('inHg = ' + j.obs[0][1] + 'mb -> ' + inhg.toString());
+	if (Poly.Units != 'metric')
+		j = toImperial(j);
+
 	if (nodelist[j.serial_number] === undefined) {
-		//logStream.write('serial number ' + j.serial_number + ' not found');
 		log('serial number ' + j.serial_number + ' not found');
 		nodelist[j.serial_number] = new WFNode("WF_Air", "",
 											   sn_2_address(j.serial_number),
 											   j.serial_number);
 		nodelist[j.serial_number].Poly = Poly;
-		//nodelist[j.serial_number].Topic = topicInput;
-		//nodelist[j.serial_number].Profile = profileNum;
 		nodelist[j.serial_number].Drivers = [
 			{driver: "GV0", value: 0, uom: 25}, // Last update
-			{driver: "GV1", value: j.obs[0][2], uom: 4}, // temp
-			{driver: "GV2", value: j.obs[0][3], uom: 22}, // humidity
-			{driver: "GV3", value: inhg, uom: 23}, // pressure
-			{driver: "GV4", value: j.obs[0][4], uom: 25}, // strikes
-			{driver: "GV5", value: j.obs[0][5], uom: 83}, // distance
-			{driver: "GV6", value: 0, uom: 4}, // dew
-			{driver: "GV7", value: 0, uom: 4}, // apparent
-			{driver: "GV8", value: 1, uom: 25}, // trend
-			{driver: "GV9", value: j.obs[0][6], uom: 72}, // battery
+			{driver: "GV1", value: j.temperature.value, uom: j.temperature.uom},
+			{driver: "GV2", value: j.humidity.value, uom: j.humidity.uom},
+			{driver: "GV3", value: j.sealevel.value, uom: j.sealevel.uom},
+			{driver: "GV4", value: j.strikes.value, uom: j.strikes.uom},
+			{driver: "GV5", value: j.strike_distance.value, uom: j.strike_distance.uom},
+			{driver: "GV6", value: j.dewpoint.value, uom: j.dewpoint.uom},
+			{driver: "GV7", value: j.apparent_temp.value, uom: j.apparent_temp.uom},
+			{driver: "GV8", value: j.trend.value, uom: j.trend.uom},
+			{driver: "GV9", value: j.battery.value, uom: j.battery.uom},
 		];
 
 		log('Adding node for serial number ' + j.serial_number);
 		nodelist[j.serial_number].addNode();
 	} else {
-		// Update node drivers with j.obs[0][xxx] values
-		nodelist[j.serial_number].setDriver("GV1", j.obs[0][2]);
-		nodelist[j.serial_number].setDriver("GV2", j.obs[0][3]);
-		nodelist[j.serial_number].setDriver("GV3", inhg);
-		nodelist[j.serial_number].setDriver("GV4", j.obs[0][4]);
-		nodelist[j.serial_number].setDriver("GV5", j.obs[0][5]);
-		nodelist[j.serial_number].setDriver("GV9", j.obs[0][6]);
-		//TODO: Figure out how to get calculated values
-		//      that rely on other node data
+		log('GV6 = ' + j.dewpoint.value);
+		log('GV7 = ' + j.apparent_temp.value);
+		// Update node drivers 
+		nodelist[j.serial_number].setDriver("GV1", j.temperature.value);
+		nodelist[j.serial_number].setDriver("GV2", j.humidity.value);
+		nodelist[j.serial_number].setDriver("GV3", j.sealevel.value);
+		nodelist[j.serial_number].setDriver("GV4", j.strikes.value);
+		nodelist[j.serial_number].setDriver("GV5", j.strike_distance.value);
+		nodelist[j.serial_number].setDriver("GV6", j.dewpoint.value);
+		nodelist[j.serial_number].setDriver("GV7", j.apparent_temp.value);
+		nodelist[j.serial_number].setDriver("GV8", j.trend.value);
+		nodelist[j.serial_number].setDriver("GV9", j.battery.value);
 	}
 }
 
 function doSky(j) {
 	console.log('In the sky observation handler');
-	var windSpeed = (Number(j.obs[0][5]) * (18 / 5)).toFixed(2);
-	var gustSpeed = (Number(j.obs[0][6]) * (18 / 5)).toFixed(2);
-	var lullSpeed = (Number(j.obs[0][4]) * (18 / 5)).toFixed(2);
 	if (nodelist[j.serial_number] === undefined) {
-		//logStream.write('serial number ' + j.serial_number + ' not found');
 		log('serial number ' + j.serial_number + ' not found');
 		nodelist[j.serial_number] = new WFNode("WF_Sky", "",
 											   sn_2_address(j.serial_number),
 											   j.serial_number);
 		nodelist[j.serial_number].Poly = Poly;
-		//nodelist[j.serial_number].Topic = topicInput;
-		//nodelist[j.serial_number].Profile = profileNum;
 		nodelist[j.serial_number].Drivers = [
 			{driver: "GV0", value: 0, uom: 25}, // Last update
-			{driver: "GV1", value: j.obs[0][1], uom: 36}, // lux
-			{driver: "GV2", value: j.obs[0][2], uom: 71}, // uv
-			{driver: "GV3", value: j.obs[0][10], uom: 74}, // radiation
-			{driver: "GV4", value: windSpeed, uom: 32}, // kph speed
-			{driver: "GV5", value: gustSpeed, uom: 32}, // kph gust
-			{driver: "GV6", value: lullSpeed, uom: 32}, // kph lull
-			{driver: "GV7", value: j.obs[0][7], uom: 14}, // direction
-			{driver: "GV8", value: 0, uom: 46}, // rain rate in/mm
-			{driver: "GV9", value: 0, uom: 82}, // daily rain
-			{driver: "GV10", value: j.obs[0][8], uom: 72}, // battery
-			{driver: "GV11", value: j.obs[0][12], uom: 25} // rain type
+			{driver: "GV1", value: j.illuminance.value, uom: j.illuminance.uom},
+			{driver: "GV2", value: j.uv.value, uom: j.uv.uom},
+			{driver: "GV3", value: j.solar_radiation.value, uom: j.solar_radiation.uom},
+			{driver: "GV4", value: j.wind_speed.value, uom: j.wind_speed.uom},
+			{driver: "GV5", value: j.gust_speed.value, uom: j.gust_speed.uom},
+			{driver: "GV6", value: j.lull_speed.value, uom: j.lull_speed.uom},
+			{driver: "GV7", value: j.wind_direction.value, uom: j.wind_direction.uom},
+			{driver: "GV8", value: j.rain_rate.value, uom: j.rain_rate.uom},
+			{driver: "GV9", value: j.rain_daily.value, uom: j.rain_daily.uom},
+			{driver: "GV10", value: j.battery.value, uom: j.battery.uom},
+			{driver: "GV11", value: j.rain_type.value, uom: j.rain_type.uom}
 		];
 
 		log('Adding node for serial number ' + j.serial_number);
 		nodelist[j.serial_number].addNode();
 	} else {
-		// Update node drivers with j.obs[0][xxx] values
-		nodelist[j.serial_number].setDriver("GV1", j.obs[0][1]);
-		nodelist[j.serial_number].setDriver("GV2", j.obs[0][2]);
-		nodelist[j.serial_number].setDriver("GV3", j.obs[0][10]);
-		nodelist[j.serial_number].setDriver("GV4", windSpeed);
-		nodelist[j.serial_number].setDriver("GV5", gustSpeed);
-		nodelist[j.serial_number].setDriver("GV6", lullSpeed);
-		nodelist[j.serial_number].setDriver("GV7", j.obs[0][7]);
-		nodelist[j.serial_number].setDriver("GV10", j.obs[0][8]);
-		nodelist[j.serial_number].setDriver("GV11", j.obs[0][12]);
+		// Update node drivers
+		nodelist[j.serial_number].setDriver("GV1", j.illuminance.value);
+		nodelist[j.serial_number].setDriver("GV2", j.uv.value);
+		nodelist[j.serial_number].setDriver("GV3", j.solar_radiation.value);
+		nodelist[j.serial_number].setDriver("GV4", j.wind_speed.value);
+		nodelist[j.serial_number].setDriver("GV5", j.gust_speed.value);
+		nodelist[j.serial_number].setDriver("GV6", j.lull_speed.value);
+		nodelist[j.serial_number].setDriver("GV7", j.wind_direction.value);
+		nodelist[j.serial_number].setDriver("GV8", j.rain_rate.value);
+		nodelist[j.serial_number].setDriver("GV9", j.rain_daily.value);
+		nodelist[j.serial_number].setDriver("GV10", j.battery.value);
+		nodelist[j.serial_number].setDriver("GV11", j.rain_type.value);
 	}
 }
 
