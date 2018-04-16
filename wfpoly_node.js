@@ -54,6 +54,14 @@ module.exports = class WFNode {
 		this.profile = Number(p);
 	}
 
+	get NodeDef() {
+		return this.id;
+	}
+
+	set NodeDef(d) {
+		this.id = d;
+	}
+
 	// TODO: Only send message if value has actually changed.
 	reportDriver(driver) {
 		var message = {
@@ -71,29 +79,34 @@ module.exports = class WFNode {
 
 	// _drivers is a dictionary <string, number>
 	// or an array of object { driver: something, value: something }
-	setDriver(driver, value) {
-		var send = this.reportDriver;
-		var dr;
+	setDriver(driver, val) {
+		var changed = false;
 
+		// Look up the driver to see if anything changed
 		this.drivers.forEach( function (d) {
 			if (d.driver == driver) {
-				d.value = value;
-				dr = d;
+				if ((d.value != val.value) || (d.uom != val.uom)) {
+					changed = true;
+					d.value = val.value;
+					d.uom = val.uom;
+				}
 			}
 		});
 
-		var message = {
-			status: {
-				address: this.address,
-				driver: dr.driver,
-				value: dr.value,
-				uom: dr.uom
+		if (changed) {
+			var message = {
+				status: {
+					address: this.address,
+					driver: driver,
+					value: val.value,
+					uom: val.uom
+				}
 			}
-		}
-		//message['node'] = Number(this.profile);
 
-		this.poly.Publish(message);
+			this.poly.Publish(message);
+		}
 	}
+
 
 	// Send out all driver values
 	reportDrivers() {

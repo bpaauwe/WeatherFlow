@@ -108,17 +108,29 @@ em.on('configured', function(Poly) {
 	for(var i = 0; i < nodes.length; i++) {
 		log('node = ' + JSON.stringify(nodes[i]));
 		if (Poly.Units.toLowerCase() == 'metric') {
-			if (nodes[i].nodedef == 'WF_SkySI')
+			if (nodes[i].NodeDef == 'WF_SkySI') {
 				log('Switching ' + nodes[i].name + '  definitions to metric');
+				nodelist[nodes[i].name].NodeDef = 'WF_Sky';
+				nodelist[nodes[i].name].addNode();
+			}
 
-			if (nodes[i].nodedef == 'WF_AirSI')
+			if (nodes[i].nodedef == 'WF_AirSI') {
 				log('Switching ' + nodes[i].name + '  definitions to metric');
+				nodelist[nodes[i].name].NodeDef = 'WF_Air';
+				nodelist[nodes[i].name].addNode();
+			}
 		} else {
-			if (nodes[i].nodedef == 'WF_Sky')
+			if (nodes[i].nodedef == 'WF_Sky') {
 				log('Switching ' + nodes[i].name + ' definitions to imperial');
+				nodelist[nodes[i].name].NodeDef = 'WF_SkySI';
+				nodelist[nodes[i].name].addNode();
+			}
 
-			if (nodes[i].nodedef == 'WF_Air')
+			if (nodes[i].nodedef == 'WF_Air') {
 				log('Switching ' + nodes[i].name + ' definitions to imperial');
+				nodelist[nodes[i].name].NodeDef = 'WF_AirSI';
+				nodelist[nodes[i].name].addNode();
+			}
 		}
 	}
 
@@ -187,7 +199,7 @@ function toImperial(data) {
 		data.apparent_temp.uom = 17;
 		data.strike_distance.value = km_2_miles(data.strike_distance.value);
 		data.strike_distance.uom = 0;
-	} else if (dta.type == 'obs_sky') {
+	} else if (data.type == 'obs_sky') {
 		// convert speed, rain
 		data.wind_speed.value = kph_2_mph(data.wind_speed.value);
 		data.wind_speed.uom = 48;
@@ -203,13 +215,18 @@ function toImperial(data) {
 }
 
 function doAir(j) {
+	var nodedef = "WF_Air";
+
 	console.log('In the air observation handler');
-	if (Poly.Units.toLowerCase() != 'metric')
+
+	if (Poly.Units.toLowerCase() != 'metric') {
 		toImperial(j);
+		nodedef = "WF_AirSI";
+	}
 
 	if (nodelist[j.serial_number] === undefined) {
 		log('serial number ' + j.serial_number + ' not found');
-		nodelist[j.serial_number] = new WFNode("WF_Air", "",
+		nodelist[j.serial_number] = new WFNode(nodedef, "",
 											   sn_2_address(j.serial_number),
 											   j.serial_number);
 		nodelist[j.serial_number].Poly = Poly;
@@ -230,23 +247,31 @@ function doAir(j) {
 		nodelist[j.serial_number].addNode();
 	} else {
 		// Update node drivers 
-		nodelist[j.serial_number].setDriver("GV1", j.temperature.value);
-		nodelist[j.serial_number].setDriver("GV2", j.humidity.value);
-		nodelist[j.serial_number].setDriver("GV3", j.sealevel.value);
-		nodelist[j.serial_number].setDriver("GV4", j.strikes.value);
-		nodelist[j.serial_number].setDriver("GV5", j.strike_distance.value);
-		nodelist[j.serial_number].setDriver("GV6", j.dewpoint.value);
-		nodelist[j.serial_number].setDriver("GV7", j.apparent_temp.value);
-		nodelist[j.serial_number].setDriver("GV8", j.trend.value);
-		nodelist[j.serial_number].setDriver("GV9", j.battery.value);
+		nodelist[j.serial_number].setDriver("GV1", j.temperature);
+		nodelist[j.serial_number].setDriver("GV2", j.humidity);
+		nodelist[j.serial_number].setDriver("GV3", j.sealevel);
+		nodelist[j.serial_number].setDriver("GV4", j.strikes);
+		nodelist[j.serial_number].setDriver("GV5", j.strike_distance);
+		nodelist[j.serial_number].setDriver("GV6", j.dewpoint);
+		nodelist[j.serial_number].setDriver("GV7", j.apparent_temp);
+		nodelist[j.serial_number].setDriver("GV8", j.trend);
+		nodelist[j.serial_number].setDriver("GV9", j.battery);
 	}
 }
 
 function doSky(j) {
+	var nodedef = "WF_Sky";
+
 	console.log('In the sky observation handler');
+
+	if (Poly.Units.toLowerCase() != 'metric') {
+		toImperial(j);
+		nodedef = "WF_SkySI";
+	}
+
 	if (nodelist[j.serial_number] === undefined) {
 		log('serial number ' + j.serial_number + ' not found');
-		nodelist[j.serial_number] = new WFNode("WF_Sky", "",
+		nodelist[j.serial_number] = new WFNode(nodedef, "",
 											   sn_2_address(j.serial_number),
 											   j.serial_number);
 		nodelist[j.serial_number].Poly = Poly;
@@ -269,17 +294,17 @@ function doSky(j) {
 		nodelist[j.serial_number].addNode();
 	} else {
 		// Update node drivers
-		nodelist[j.serial_number].setDriver("GV1", j.illuminance.value);
-		nodelist[j.serial_number].setDriver("GV2", j.uv.value);
-		nodelist[j.serial_number].setDriver("GV3", j.solar_radiation.value);
-		nodelist[j.serial_number].setDriver("GV4", j.wind_speed.value);
-		nodelist[j.serial_number].setDriver("GV5", j.gust_speed.value);
-		nodelist[j.serial_number].setDriver("GV6", j.lull_speed.value);
-		nodelist[j.serial_number].setDriver("GV7", j.wind_direction.value);
-		nodelist[j.serial_number].setDriver("GV8", j.rain_rate.value);
-		nodelist[j.serial_number].setDriver("GV9", j.rain_daily.value);
-		nodelist[j.serial_number].setDriver("GV10", j.battery.value);
-		nodelist[j.serial_number].setDriver("GV11", j.rain_type.value);
+		nodelist[j.serial_number].setDriver("GV1", j.illuminance);
+		nodelist[j.serial_number].setDriver("GV2", j.uv);
+		nodelist[j.serial_number].setDriver("GV3", j.solar_radiation);
+		nodelist[j.serial_number].setDriver("GV4", j.wind_speed);
+		nodelist[j.serial_number].setDriver("GV5", j.gust_speed);
+		nodelist[j.serial_number].setDriver("GV6", j.lull_speed);
+		nodelist[j.serial_number].setDriver("GV7", j.wind_direction);
+		nodelist[j.serial_number].setDriver("GV8", j.rain_rate);
+		nodelist[j.serial_number].setDriver("GV9", j.rain_daily);
+		nodelist[j.serial_number].setDriver("GV10", j.battery);
+		nodelist[j.serial_number].setDriver("GV11", j.rain_type);
 	}
 }
 
