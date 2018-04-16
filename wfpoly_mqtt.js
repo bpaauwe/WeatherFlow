@@ -29,6 +29,12 @@ module.exports = class PolyMQTT {
 		return 'metric';
 	}
 
+	get Elevation() {
+		if (this.config.customParams.Elevation !== undefined) {
+			return Number(this.config.customParams.Elevation);
+		}
+		return 0;
+	}
 
 	Start() {
 		var options = {
