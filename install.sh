@@ -1,3 +1,3 @@
-#!/bin/bash
-npm install "mqtt" --save
-npm install "fs-extra" --save
+#!/usr/bin/env bash
+/usr/bin/npm install "mqtt" --save
+/usr/bin/npm install "fs-extra" --save
