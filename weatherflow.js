@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+//
+//
 const mqtt = require('mqtt');
 const os= require('os');
 const fs = require('fs-extra');
@@ -16,13 +18,7 @@ async function log(text) {
 	await fs.outputFile(file, `${text}${os.EOL}`, logopts);
 }
 
-// How do we really get our profile number?
-// From the example, it seems we need to check for an ENVIRONMENT
-// variable or from stdin. That seems crazy.
-//  maybe on stdin {"token":"asdasdf", "mqttHost":"localhost",
-//  "mqttPort":"1883","profileNum":"xx"}
-// Or check env PROFILE_NUM?
-var profileNum = "3";
+var profileNum = "";
 var units = 'metric';
 var nodelist = {};
 var mqttHost = 'mqtts://192.168.92.100';
@@ -70,7 +66,7 @@ process.stdin.on('end', function() {
 
 // Wait here until we have the info needed to start
 console.log('Starting');
-log('Starting WeatherFlowPoly');
+log('Starting WeatherFlow Node Server');
 log('ProfileNumberEnv: ' + process.env.PROFILE_NUM);
 log('ProfileNumberStdin: ' + profile_number);
 log('stdin: ' + data);
@@ -78,8 +74,7 @@ log('stdin: ' + data);
 _this = this;
 em.on('Ready', GotInput);
 function GotInput(aPoly) {
-	console.log('We now have all our input, start mqtt here??');
-	log('We now have all our input, start mqtt here??');
+	log('We now have all our input, start mqtt connection.');
 
 	// Start mqtt connection with Polyglot
 	Poly = new PolyMQTT(mqttHost, mqttPort, profileNum, em, log);
@@ -92,7 +87,6 @@ function GotInput(aPoly) {
 //em.on('configured', Configure(log));
 
 em.on('configured', function(Poly) {
-	console.log("MQTT connection has been configured");
 	log("MQTT connection has been configured");
 	// Get nodes from Poly
 	var nodes = Poly.ConfiguredNodes;
@@ -103,10 +97,6 @@ em.on('configured', function(Poly) {
 
 	// Set the proper node type WF_Air vs. WF_AirSI based
 	// on config.  
-	// TODO: Polyglot doesn't support changing node definitions so
-	//       the only way to make this work would be to delete the
-	//       node and re-create with the new definition. Not a good
-	//       solution.
 	for(var i = 0; i < nodes.length; i++) {
 		log('node = ' + JSON.stringify(nodes[i]));
 		if (Poly.Units.toLowerCase() == 'metric') {
@@ -220,8 +210,6 @@ function toImperial(data) {
 function doAir(j) {
 	var nodedef = "WF_Air";
 
-	console.log('In the air observation handler');
-
 	if (Poly.Units.toLowerCase() != 'metric') {
 		toImperial(j);
 		nodedef = "WF_AirSI";
@@ -266,8 +254,6 @@ function doAir(j) {
 
 function doSky(j) {
 	var nodedef = "WF_Sky";
-
-	console.log('In the sky observation handler');
 
 	if (Poly.Units.toLowerCase() != 'metric') {
 		toImperial(j);
@@ -328,39 +314,4 @@ function sn_2_address(sn) {
 
 	return addr;
 }
-
-// What are the types of messages we can publish
-//  and on which topic?
-
-// Add a node to the NodeServer (and to the ISY?)
-//var message = {
-//	'addnode': {
-//		'nodes': [{
-//			'address': '<node address>',
-//			'name': '<node name>',
-//			'node_def_id': '<id>',
-//			'primary': 'true | false or address?',
-//			'drivers': '???  another json formatted object?'
-//		}]
-//	}
-//};
-
-// data is key/value pairs to store in pPolygot database
-//var message = { 'customdata': data };
-
-// data is key/value pairs to store in pPolygot database
-//var message = { 'customparams': data };
-
-// custom notice to front-end for this Node Server
-//var message = { 'addnotice': string };
-//var message = { 'removenotice': string };
-
-// Ask Polyglot to restart me
-//var message = { 'restart' : {} };
-
-// Install profile files on ISY
-//var message = { 'installprofile': { 'reboot': False } };
-
-// Delete a node from the Node Server
-//var message = { 'removenode': { 'address': '<address>' } };
 
