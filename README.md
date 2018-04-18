@@ -20,23 +20,17 @@ This node server is intended to support the [WeatherFlow Smart Weather Station](
 6. This should find your Air/Sky sensors and add them to the ISY with all the sensor values.
 
 ### Node Settings
-The settings for this node are
+The settings for this node are:
 
-#### Node Server Connected
-   * Status of nodeserver process, this should be monitored by a program if you want to know the status
-   * There is a known issue in Polyglot that upon startup, this is not always properly set.
-#### Version Major
-   * The major version of this nodeserver
-#### Version Minor
-   * The minor version of this nodeserver
-#### Hubs
-   * The number of hubs currently managed
-#### Debug Mode
-   * The debug printing mode
 #### Short Poll
-   * This is how often it will Poll the Hub to get the current activity
+   * This is how often it will update the last update time for each node.
 #### Long Poll
    * Not currently used
+#### Elevation
+   * The height of the Air sensor above sea level, in meters.
+#### Units
+   * Display data in either 'metric' or 'imperial' units.
+
 
 ## Requirements
 
@@ -46,7 +40,7 @@ The settings for this node are
   Stretch, but I would recommend just re-imaging the SD card.  Some helpful links:
    * https://www.raspberrypi.org/blog/raspbian-stretch/
    * https://linuxconfig.org/raspbian-gnu-linux-upgrade-from-jessie-to-raspbian-stretch-9
-1. This has only been tested with ISY 5.0.11 so it is not guaranteed to work with any other version.
+1. This has only been tested with ISY 5.0.12 so it is not guaranteed to work with any other version.
 
 # Upgrading
 
@@ -59,6 +53,9 @@ Then restart the WeatherFlow nodeserver by selecting it in the Polyglot dashboar
 The WeatherFlow nodeserver keeps track of the version number and when a profile rebuild is necessary.  The profile/version.txt will contain the WeatherFlow profile_version which is updated in server.json when the profile should be rebuilt.
 
 # Release Notes
+
+- 0.1.0 04/18/2018
+   - Initial version published in the Polyglot node server store
 
 - 0.0.1 04/15/2018
    - Initial version published to github
