@@ -84,6 +84,7 @@ function GotInput(aPoly) {
 	// Start mqtt connection with Polyglot
 	Poly = new PolyMQTT(mqttHost, mqttPort, profileNum, em, log);
 	Poly.Start();
+	Poly.Poll = doPoll;
 	log('MQTT connection with Polyglot has been started.');
 }
 
@@ -233,7 +234,7 @@ function doAir(j) {
 											   j.serial_number);
 		nodelist[j.serial_number].Poly = Poly;
 		nodelist[j.serial_number].Drivers = [
-			{driver: "GV0", value: 0, uom: 25}, // Last update
+			{driver: "GV0", value: 0, uom: 58}, // Last update
 			{driver: "GV1", value: j.temperature.value, uom: j.temperature.uom},
 			{driver: "GV2", value: j.humidity.value, uom: j.humidity.uom},
 			{driver: "GV3", value: j.sealevel.value, uom: j.sealevel.uom},
@@ -249,6 +250,7 @@ function doAir(j) {
 		nodelist[j.serial_number].addNode();
 	} else {
 		// Update node drivers 
+		nodelist[j.serial_number].setDriver("GV0", {'value':0,'uom':58});
 		nodelist[j.serial_number].setDriver("GV1", j.temperature);
 		nodelist[j.serial_number].setDriver("GV2", j.humidity);
 		nodelist[j.serial_number].setDriver("GV3", j.sealevel);
@@ -258,6 +260,7 @@ function doAir(j) {
 		nodelist[j.serial_number].setDriver("GV7", j.apparent_temp);
 		nodelist[j.serial_number].setDriver("GV8", j.trend);
 		nodelist[j.serial_number].setDriver("GV9", j.battery);
+		Poly.LastUpdate(j.serial_number);
 	}
 }
 
@@ -278,7 +281,7 @@ function doSky(j) {
 											   j.serial_number);
 		nodelist[j.serial_number].Poly = Poly;
 		nodelist[j.serial_number].Drivers = [
-			{driver: "GV0", value: 0, uom: 25}, // Last update
+			{driver: "GV0", value: 0, uom: 58}, // Last update
 			{driver: "GV1", value: j.illuminance.value, uom: j.illuminance.uom},
 			{driver: "GV2", value: j.uv.value, uom: j.uv.uom},
 			{driver: "GV3", value: j.solar_radiation.value, uom: j.solar_radiation.uom},
@@ -296,6 +299,7 @@ function doSky(j) {
 		nodelist[j.serial_number].addNode();
 	} else {
 		// Update node drivers
+		nodelist[j.serial_number].setDriver("GV0", {'value':0,'uom':58});
 		nodelist[j.serial_number].setDriver("GV1", j.illuminance);
 		nodelist[j.serial_number].setDriver("GV2", j.uv);
 		nodelist[j.serial_number].setDriver("GV3", j.solar_radiation);
@@ -307,7 +311,14 @@ function doSky(j) {
 		nodelist[j.serial_number].setDriver("GV9", j.rain_daily);
 		nodelist[j.serial_number].setDriver("GV10", j.battery);
 		nodelist[j.serial_number].setDriver("GV11", j.rain_type);
+		Poly.LastUpdate(j.serial_number);
 	}
+}
+
+function doPoll(sn, lupdate) {
+	//log('Last update of ' + sn + ' was ' + lupdate + ' seconds ago');
+	var l = { 'value': lupdate, 'uom': 58 };
+	nodelist[sn].setDriver("GV0", l);
 }
 
 function sn_2_address(sn) {

@@ -12,6 +12,8 @@ module.exports = class PolyMQTT {
 		this.log = log;
 		this.customParams = null;
 		this.newParams = null;
+		this.LastTime = [];
+		this.ShortPoll = null;
 	}
 
 	get ConfiguredNodes() {
@@ -37,6 +39,15 @@ module.exports = class PolyMQTT {
 		}
 		return 0;
 	}
+
+	LastUpdate(address) {
+		this.LastTime[address] = new Date().getTime();
+	}
+
+	set Poll (pollhandler) {
+        this.ShortPoll = pollhandler;
+    }
+
 
 	Start() {
 		var options = {
@@ -152,7 +163,7 @@ module.exports = class PolyMQTT {
 			} else if (msg.connected !== undefined) {
 				console.log("Polyglot says we're connected");
 			} else if (msg.stop !== undefined) {
-				console.log("Polyglot says stop");
+				this.log("Polyglot says stop");
 			} else {
 				if (msg.query !== undefined) {
 				} else if (msg.command !== undefined) {
@@ -174,6 +185,16 @@ module.exports = class PolyMQTT {
 					}
 				} else if (msg.status !== undefined) {
 				} else if (msg.shortPoll !== undefined) {
+					for (var addr in this.LastTime) {
+						var d = new Date().getTime();
+						var ms = ((d - this.LastTime[addr]) / 1000).toFixed(0);
+						if (this.ShortPoll != null) {
+							this.ShortPoll(addr, ms);
+						}
+					}
+					//this.log("shortpoll received." + );
+					// Can we use this to send an updated time since last
+					// update to ISY?
 				} else if (msg.longPoll !== undefined) {
 				} else if (msg.delete !== undefined) {
 				} else {
