@@ -1,4 +1,7 @@
-//use "strict";
+//
+// WeatherFlow - ISY Node Server for Weather Flow weather station data
+//
+// Copyright (C) 2018 Robert Paauwe
 
 // Usage:
 //

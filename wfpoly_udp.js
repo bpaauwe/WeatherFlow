@@ -1,4 +1,8 @@
-//use strict;
+//
+// WeatherFlow - ISY Node Server for Weather Flow weather station data
+//
+// Copyright (C) 2018 Robert Paauwe
+
 const dgram = require('dgram');
 
 module.exports = class WFUDP {

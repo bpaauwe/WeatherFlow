@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 //
+// WeatherFlow - ISY Node Server for Weather Flow weather station data
 //
+// Copyright (C) 2018 Robert Paauwe
+
 const mqtt = require('mqtt');
 const os= require('os');
 const fs = require('fs-extra');

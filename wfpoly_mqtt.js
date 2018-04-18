@@ -1,3 +1,8 @@
+//
+// WeatherFlow - ISY Node Server for Weather Flow weather station data
+//
+// Copyright (C) 2018 Robert Paauwe
+
 const mqtt = require('mqtt');
 const url = require('url');
 
