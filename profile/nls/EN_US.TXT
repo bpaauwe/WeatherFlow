@@ -1,0 +1,129 @@
+ND-WF_Air-NAME = WeatherFlow Smart Weather Station Air (metric)
+ND-WF_Air-ICON = Weather
+ND-WF_AirSI-NAME = WeatherFlow Smart Weather Station Air (SI)
+ND-WF_AirSI-ICON = Weather
+ST-139A-GV0-NAME = Last Update 
+ST-139A-GV1-NAME = Temperature
+ST-139A-GV2-NAME = Humidity
+ST-139A-GV3-NAME = Barometric Pressure
+ST-139A-GV4-NAME = Lightning Strikes
+ST-139A-GV5-NAME = Lightning Distance
+ST-139A-GV6-NAME = DewPoint 
+ST-139A-GV7-NAME = Apparent Temperature
+ST-139A-GV8-NAME = Pressure Trend
+ST-139A-GV9-NAME = Battery
+
+ND-WF_AirD-NAME = WeatherFlow Smart Weather Station Air (device)
+ND-WF_AirD-ICON = Input
+ST-139AD-GV0-NAME = Battery
+ST-139AD-GV1-NAME = Uptime
+ST-139AD-GV2-NAME = Signal Strength
+ST-139AD-GV3-NAME = Lightning Sensor
+ST-139AD-GV4-NAME = Lightning Noise
+ST-139AD-GV5-NAME = Lightning Disturber
+ST-139AD-GV6-NAME = Pressure Sensor
+ST-139AD-GV7-NAME = Temperature Sensor
+ST-139AD-GV8-NAME = Humidity Sensor
+ST-139AD-GV9-NAME = Firmware Revision
+
+ND-WF_Sky-NAME = WeatherFlow Smart Weather Station Sky (metric)
+ND-WF_Sky-ICON = Weather
+ND-WF_SkySI-NAME = WeatherFlow Smart Weather Station Sky (SI)
+ND-WF_SkySI-ICON = Weather
+ST-139S-GV0-NAME = Last Update
+ST-139S-GV1-NAME = Illumination
+ST-139S-GV2-NAME = UV Index
+ST-139S-GV3-NAME = Solar Radiation
+ST-139S-GV4-NAME = Wind Speed
+ST-139S-GV5-NAME = Gust Speed
+ST-139S-GV6-NAME = Wind Lull
+ST-139S-GV7-NAME = Wind Direction
+ST-139S-GV8-NAME = Rain Rate
+ST-139S-GV9-NAME = Daily Rainfall
+ST-139S-GV10-NAME = Battery
+ST-139S-GV11-NAME = Rain Type
+
+ND-WF_SkyD-NAME = WeatherFlow Smart Weather Station Sky (device)
+ND-WF_SkyD-ICON = Input
+ST-139SD-GV0-NAME = Battery
+ST-139SD-GV1-NAME = Uptime
+ST-139SD-GV2-NAME = Signal Strength
+ST-139SD-GV3-NAME = Wind Sensor
+ST-139SD-GV4-NAME = Precipitation Sensor
+ST-139SD-GV5-NAME = Light/UV Sensor
+ST-139SD-GV6-NAME = Firmware Revision
+
+ND-WF_Hub-NAME = WeatherFlow Smart Weather Station Hub
+ND-WF_Hub-ICON = Input
+ST-139H-GV0-NAME = Heartbeat
+ST-139H-GV1-NAME = Firmware Revision
+ST-139H-GV2-NAME = Uptime
+ST-139H-GV3-NAME = Signal Strength
+ST-139H-GV4-NAME = Sequence
+
+ND-WF_Lightning-NAME = WeatherFlow Smart Weather Station Lightning
+ND-WF_Lightning-ICON = Weather
+ND-WF_LightningSI-NAME = WeatherFlow Smart Weather Station Lightning
+ND-WF_LightningSI-ICON = Weather
+ST-139L-GV0-NAME = Time
+ST-139L-GV1-NAME = Distance
+ST-139L-GV2-NAME = Energy
+
+ND-WF_RapidWind-NAME = WeatherFlow Smart Weather Station Rapid Wind
+ND-WF_RapidWind-ICON = Weather
+ND-WF_RapidWindSI-NAME = WeatherFlow Smart Weather Station Rapid Wind
+ND-WF_RapidWindSI-ICON = Weather
+ST-139R-GV0-NAME = Rapid Wind Direction
+ST-139R-GV1-NAME = Rapid Wind Speed
+
+CMD-ST-NAME = Query
+
+EN_SENSOR_STATUS-0 = OK
+EN_SENSOR_STATUS-1 = Failed
+
+EN_SENSOR_TRIGGER-0 = OK
+EN_SENSOR_TRIGGER-1 = Triggered
+
+EN_RAINTYPE-0 = None
+EN_RAINTYPE-1 = Rain
+EN_RAINTYPE-2 = Hail
+EN_RAINTYPE-3 = Rain & Hail
+
+EN_TREND-0 = Falling
+EN_TREND-1 = Steady
+EN_TREND-2 = Rising
+
+EN_CARDINAL-0 = N
+EN_CARDINAL-1 = NNE
+EN_CARDINAL-2 = NE
+EN_CARDINAL-3 = ENE
+EN_CARDINAL-4 = E
+EN_CARDINAL-5 = ESE
+EN_CARDINAL-6 = SE
+EN_CARDINAL-7 = SSE
+EN_CARDINAL-8 = S
+EN_CARDINAL-9 = SSW
+EN_CARDINAL-10 = SW
+EN_CARDINAL-11 = WSW
+EN_CARDINAL-12 = W
+EN_CARDINAL-13 = WNW
+EN_CARDINAL-14 = NW
+EN_CARDINAL-15 = NNW
+
+EN_WIND_DIRECTION-0 = N
+EN_WIND_DIRECTION-1 = NNE
+EN_WIND_DIRECTION-2 = NE
+EN_WIND_DIRECTION-3 = ENE
+EN_WIND_DIRECTION-4 = E
+EN_WIND_DIRECTION-5 = ESE
+EN_WIND_DIRECTION-6 = SE
+EN_WIND_DIRECTION-7 = SSE
+EN_WIND_DIRECTION-8 = S
+EN_WIND_DIRECTION-9 = SSW
+EN_WIND_DIRECTION-10 = SW
+EN_WIND_DIRECTION-11 = WSW
+EN_WIND_DIRECTION-12 = W
+EN_WIND_DIRECTION-13 = WNW
+EN_WIND_DIRECTION-14 = NW
+EN_WIND_DIRECTION-15 = NNW
+
