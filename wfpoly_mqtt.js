@@ -57,38 +57,35 @@ module.exports = class PolyMQTT {
 			password: 'admin',
 			rejectUnauthorized: false,
 		};
-		var _this = this;
 
 		this.client = mqtt.connect(this.host, options);
 
-		this.client.on('error', function() {
-			console.log('error making mqtt connection to polyglot');
+		this.client.on('error', () => {
+			this.log('error making mqtt connection to polyglot');
 		});
 
-		this.client.on('connect', function() {
+		this.client.on('connect', () => {
 			console.log('connected');
-			_this.log('MQTT host connected');
-			_this.client.subscribe('udi/polyglot/connections/polyglot');
-			_this.client.subscribe('udi/polyglot/connections/' + _this.profile);
-			_this.client.subscribe(_this.topic);
+			this.log('MQTT host connected');
+			this.client.subscribe('udi/polyglot/connections/polyglot');
+			this.client.subscribe('udi/polyglot/connections/' + this.profile);
+			this.client.subscribe(this.topic);
 
-			var msg = { node: _this.profile, connected: true };
+			var msg = { node: this.profile, connected: true };
 
-			_this.Publish(msg);
+			this.Publish(msg);
 
 			// If this.ready is a callback, call it here
-			_this.ready.emit('connected', '');
+			this.ready.emit('connected', '');
 		});
 
-		//this.client.on('message', this.messagehandler);
-		//this.client.on('message', function(topic, message) {
 		this.client.on('message', (topic, message) => {
-			//_this.log("Received message from poly");
+			//this.log("Received message from poly");
 			if (topic == 'udi/polyglot/connections/polyglot') {
 				console.log(topic + ' sent ' + message);
-			} else if (topic == 'udi/polyglot/connections/' + _this.profile) {
+			} else if (topic == 'udi/polyglot/connections/' + this.profile) {
 				console.log(topic + ' sent ' + message);
-			} else if (topic == _this.topic) {
+			} else if (topic == this.topic) {
 				this.ProcessPolyMsg(message);
 			} else {
 				console.log(topic + ' unknown ' + message);
@@ -104,8 +101,8 @@ module.exports = class PolyMQTT {
 			}
 		});
 
-		this.client.on('disconnect', function() {
-			console.log("Got a disconnect, clean up");
+		this.client.on('disconnect', () => {
+			this.log("Got a disconnect, clean up");
 		});
 	}
 
@@ -115,7 +112,7 @@ module.exports = class PolyMQTT {
     	var options = {
 			retain: false
 		};
-		console.log('SENDING: ' + JSON.stringify(message));
+		//this.log('SENDING: ' + JSON.stringify(message));
 		this.client.publish(this.topic, JSON.stringify(message), false);
 	}
 
@@ -154,8 +151,6 @@ module.exports = class PolyMQTT {
 
 				this.log('customParams = ' + JSON.stringify(this.customParams));
 				this.log('newParams    = ' + JSON.stringify(this.newParams));
-				//_this.log('config =');
-				//_this.log(JSON.stringify(config));
 
 				// Is there other config data that we should be 
 				// looking at or saving?
@@ -185,6 +180,7 @@ module.exports = class PolyMQTT {
 					}
 				} else if (msg.status !== undefined) {
 				} else if (msg.shortPoll !== undefined) {
+					//this.log("shortpoll received." );
 					for (var addr in this.LastTime) {
 						var d = new Date().getTime();
 						var ms = ((d - this.LastTime[addr]) / 1000).toFixed(0);
@@ -192,9 +188,6 @@ module.exports = class PolyMQTT {
 							this.ShortPoll(addr, ms);
 						}
 					}
-					//this.log("shortpoll received." + );
-					// Can we use this to send an updated time since last
-					// update to ISY?
 				} else if (msg.longPoll !== undefined) {
 				} else if (msg.delete !== undefined) {
 				} else {
@@ -203,7 +196,6 @@ module.exports = class PolyMQTT {
 			}
 		} else {
 			console.log("message from/for node: " + msg.node);
-			//console.log(JSON.stringify(msg));
 		}
 	}
 
