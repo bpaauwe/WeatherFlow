@@ -29,7 +29,7 @@ The settings for this node are:
 #### Elevation
    * The height of the Air sensor above sea level, in meters.
 #### Units
-   * Display data in either 'metric' or 'imperial' units.
+   * Display data in either 'metric', 'US', or 'UK' units.
 
 
 ## Requirements

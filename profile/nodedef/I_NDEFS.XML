@@ -1,6 +1,6 @@
 <nodeDefs>
 <!-- === Weather Flow ===================================================  -->
-    <nodeDef id="WF_Air" nodeType="139" nls="139A" >
+  <nodeDef id="WF_Air" nodeType="139" nls="139A" >
 		<sts>
 			<st id="GV0" editor="I_LAST_UPDATE" />
 			<st id="GV1" editor="I_TEMP_C" />
@@ -13,14 +13,9 @@
 			<st id="GV8" editor="I_TREND" />
 			<st id="GV9" editor="I_VOLTS" />
 		</sts>
-		<cmds>
-			<accepts>
-				<cmd id="QUERY" />
-			</accepts>
-		</cmds>
 	</nodeDef>
 
-    <nodeDef id="WF_AirSI" nodeType="139" nls="139A" >
+  <nodeDef id="WF_AirUS" nodeType="139" nls="139A" >
 		<sts>
 			<st id="GV0" editor="I_LAST_UPDATE" />
 			<st id="GV1" editor="I_TEMP_F" />
@@ -33,11 +28,21 @@
 			<st id="GV8" editor="I_TREND" />
 			<st id="GV9" editor="I_VOLTS" />
 		</sts>
-		<cmds>
-			<accepts>
-				<cmd id="QUERY" />
-			</accepts>
-		</cmds>
+	</nodeDef>
+
+  <nodeDef id="WF_AirUK" nodeType="139" nls="139A" >
+		<sts>
+			<st id="GV0" editor="I_LAST_UPDATE" />
+			<st id="GV1" editor="I_TEMP_C" />
+			<st id="GV2" editor="I_HUMIDITY" />
+			<st id="GV3" editor="I_INHG" />
+			<st id="GV4" editor="I_INTEGER" />
+			<st id="GV5" editor="I_MILES" />
+			<st id="GV6" editor="I_TEMP_C" />
+			<st id="GV7" editor="I_TEMP_C" />
+			<st id="GV8" editor="I_TREND" />
+			<st id="GV9" editor="I_VOLTS" />
+		</sts>
 	</nodeDef>
 
 	<nodeDef id="WF_AirD" nodeType="139" nls="139AD" >
@@ -55,7 +60,7 @@
 		</sts>
 	</nodeDef>
 
-    <nodeDef id="WF_Sky" nodeType="139" nls="139S" >
+  <nodeDef id="WF_Sky" nodeType="139" nls="139S" >
 		<sts>
 			<st id="GV8" editor="I_MMHR" />
 			<st id="GV11" editor="I_RAINTYPE" />
@@ -70,14 +75,9 @@
 			<st id="GV10" editor="I_VOLTS" />
 			<st id="GV0" editor="I_LAST_UPDATE" />
 		</sts>
-		<cmds>
-			<accepts>
-				<cmd id="QUERY" />
-			</accepts>
-		</cmds>
 	</nodeDef>
 
-    <nodeDef id="WF_SkySI" nodeType="139" nls="139S" >
+  <nodeDef id="WF_SkyUS" nodeType="139" nls="139S" >
 		<sts>
 			<st id="GV8" editor="I_INHR" />
 			<st id="GV11" editor="I_RAINTYPE" />
@@ -92,11 +92,23 @@
 			<st id="GV10" editor="I_VOLTS" />
 			<st id="GV0" editor="I_LAST_UPDATE" />
 		</sts>
-		<cmds>
-			<accepts>
-				<cmd id="QUERY" />
-			</accepts>
-		</cmds>
+	</nodeDef>
+
+  <nodeDef id="WF_SkyUK" nodeType="139" nls="139S" >
+		<sts>
+			<st id="GV8" editor="I_MMHR" />
+			<st id="GV11" editor="I_RAINTYPE" />
+			<st id="GV9" editor="I_MM" />
+			<st id="GV1" editor="I_LUX" />
+			<st id="GV2" editor="I_UV" />
+			<st id="GV3" editor="I_RADIATION" />
+			<st id="GV4" editor="I_MPH" />
+			<st id="GV5" editor="I_MPH" />
+			<st id="GV6" editor="I_MPH" />
+			<st id="GV7" editor="I_DEGREE" />
+			<st id="GV10" editor="I_VOLTS" />
+			<st id="GV0" editor="I_LAST_UPDATE" />
+		</sts>
 	</nodeDef>
 
 	<nodeDef id="WF_SkyD" nodeType="139" nls="139SD" >
@@ -129,7 +141,15 @@
 		</sts>
 	</nodeDef>
 
-	<nodeDef id="WF_LightningSI" nodeType="139" nls="139L" >
+	<nodeDef id="WF_LightningUS" nodeType="139" nls="139L" >
+		<sts>
+			<st id="GV0" editor="I_LAST_UPDATE" />
+			<st id="GV1" editor="I_MILES" />
+			<st id="GV2" editor="I_ENERGY" />
+		</sts>
+	</nodeDef>
+
+	<nodeDef id="WF_LightningUK" nodeType="139" nls="139L" >
 		<sts>
 			<st id="GV0" editor="I_LAST_UPDATE" />
 			<st id="GV1" editor="I_MILES" />
@@ -144,13 +164,19 @@
 		</sts>
 	</nodeDef>
 
-	<nodeDef id="WF_RapidWindSI" nodeType="139" nls="139R" >
+	<nodeDef id="WF_RapidWindUS" nodeType="139" nls="139R" >
 		<sts>
 			<st id="GV0" editor="I_WIND_DIRECTION" />
 			<st id="GV1" editor="I_MPH" />
 		</sts>
 	</nodeDef>
 
+	<nodeDef id="WF_RapidWindUK" nodeType="139" nls="139R" >
+		<sts>
+			<st id="GV0" editor="I_WIND_DIRECTION" />
+			<st id="GV1" editor="I_MPH" />
+		</sts>
+	</nodeDef>
 
 </nodeDefs>
 

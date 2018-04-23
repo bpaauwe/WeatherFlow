@@ -98,32 +98,44 @@ em.on('configured', function(Poly) {
 		AddNode(nodes[i], Poly);
 	}
 
-	// Set the proper node type WF_Air vs. WF_AirSI based
+	// Set the proper node type WF_Air vs. WF_AirUS vs. WF_AirUK based
 	// on config.  
 	for(var i = 0; i < nodes.length; i++) {
 		log('node = ' + JSON.stringify(nodes[i]));
 		if (Poly.Units.toLowerCase() == 'metric') {
-			if (nodes[i].NodeDef == 'WF_SkySI') {
+			if (nodes[i].NodeDef != 'WF_Sky') {
 				log('Switching ' + nodes[i].name + '  definitions to metric');
 				nodelist[nodes[i].name].NodeDef = 'WF_Sky';
 				nodelist[nodes[i].name].addNode();
 			}
 
-			if (nodes[i].nodedef == 'WF_AirSI') {
+			if (nodes[i].nodedef != 'WF_Air') {
 				log('Switching ' + nodes[i].name + '  definitions to metric');
 				nodelist[nodes[i].name].NodeDef = 'WF_Air';
 				nodelist[nodes[i].name].addNode();
 			}
-		} else {
-			if (nodes[i].nodedef == 'WF_Sky') {
-				log('Switching ' + nodes[i].name + ' definitions to imperial');
-				nodelist[nodes[i].name].NodeDef = 'WF_SkySI';
+		} else if (Poly.Units.toLowerCase() == 'uk') {
+			if (nodes[i].NodeDef != 'WF_SkyUK') {
+				log('Switching ' + nodes[i].name + '  definitions to UK');
+				nodelist[nodes[i].name].NodeDef = 'WF_SkyUK';
 				nodelist[nodes[i].name].addNode();
 			}
 
-			if (nodes[i].nodedef == 'WF_Air') {
+			if (nodes[i].nodedef != 'WF_AirUK') {
+				log('Switching ' + nodes[i].name + '  definitions to UK');
+				nodelist[nodes[i].name].NodeDef = 'WF_AirUK';
+				nodelist[nodes[i].name].addNode();
+			}
+		} else { // US imperial
+			if (nodes[i].nodedef != 'WF_SkyUS') {
 				log('Switching ' + nodes[i].name + ' definitions to imperial');
-				nodelist[nodes[i].name].NodeDef = 'WF_AirSI';
+				nodelist[nodes[i].name].NodeDef = 'WF_SkyUS';
+				nodelist[nodes[i].name].addNode();
+			}
+
+			if (nodes[i].nodedef != 'WF_AirUS') {
+				log('Switching ' + nodes[i].name + ' definitions to imperial');
+				nodelist[nodes[i].name].NodeDef = 'WF_AirUS';
 				nodelist[nodes[i].name].addNode();
 			}
 		}
@@ -184,7 +196,7 @@ function mm_2_inch(mm) {
 
 
 // convert the data values from metric to imperial
-function toImperial(data) {
+function toUS(data) {
 	if (data.type == 'obs_air') {
 		// convert temp and distance
 		data.temperature.value = c_2_f(data.temperature.value);
@@ -210,12 +222,34 @@ function toImperial(data) {
 	}
 }
 
+// convert the data values from metric to UK 
+function toUK(data) {
+	if (data.type == 'obs_air') {
+		// convert distance
+		data.strike_distance.value = km_2_miles(data.strike_distance.value);
+		data.strike_distance.uom = 0;
+	} else if (data.type == 'obs_sky') {
+		// convert speed
+		data.wind_speed.value = kph_2_mph(data.wind_speed.value);
+		data.wind_speed.uom = 48;
+		data.gust_speed.value = kph_2_mph(data.gust_speed.value);
+		data.gust_speed.uom = 48;
+		data.lull_speed.value = kph_2_mph(data.lull_speed.value);
+		data.lull_speed.uom = 48;
+	}
+}
+
+
 function doAir(j) {
 	var nodedef = "WF_Air";
 
-	if (Poly.Units.toLowerCase() != 'metric') {
-		toImperial(j);
-		nodedef = "WF_AirSI";
+	if ((Poly.Units.toLowerCase() == 'imperial') ||
+		(Poly.Units.toLowerCase() == 'us')) {
+		toUS(j);
+		nodedef = "WF_AirUS";
+	} else if (Poly.Units.toLowerCase() == 'uk') {
+		toUK(j);
+		nodedef = "WF_AirUK";
 	}
 
 	if (nodelist[j.serial_number] === undefined) {
@@ -258,9 +292,13 @@ function doAir(j) {
 function doSky(j) {
 	var nodedef = "WF_Sky";
 
-	if (Poly.Units.toLowerCase() != 'metric') {
-		toImperial(j);
-		nodedef = "WF_SkySI";
+	if ((Poly.Units.toLowerCase() == 'imperial') ||
+		(Poly.Units.toLowerCase() == 'us')) {
+		toUS(j);
+		nodedef = "WF_SkyUS";
+	} else if (Poly.Units.toLowerCase() == 'uk') {
+		toUK(j);
+		nodedef = "WF_SkyUK";
 	}
 
 	if (nodelist[j.serial_number] === undefined) {

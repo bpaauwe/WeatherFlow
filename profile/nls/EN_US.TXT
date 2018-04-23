@@ -1,7 +1,9 @@
 ND-WF_Air-NAME = WeatherFlow Smart Weather Station Air (metric)
 ND-WF_Air-ICON = Weather
-ND-WF_AirSI-NAME = WeatherFlow Smart Weather Station Air (SI)
-ND-WF_AirSI-ICON = Weather
+ND-WF_AirUS-NAME = WeatherFlow Smart Weather Station Air (US)
+ND-WF_AirUS-ICON = Weather
+ND-WF_AirUK-NAME = WeatherFlow Smart Weather Station Air (UK)
+ND-WF_AirUK-ICON = Weather
 ST-139A-GV0-NAME = Last Update 
 ST-139A-GV1-NAME = Temperature
 ST-139A-GV2-NAME = Humidity
@@ -28,8 +30,10 @@ ST-139AD-GV9-NAME = Firmware Revision
 
 ND-WF_Sky-NAME = WeatherFlow Smart Weather Station Sky (metric)
 ND-WF_Sky-ICON = Weather
-ND-WF_SkySI-NAME = WeatherFlow Smart Weather Station Sky (SI)
-ND-WF_SkySI-ICON = Weather
+ND-WF_SkyUS-NAME = WeatherFlow Smart Weather Station Sky (US)
+ND-WF_SkyUS-ICON = Weather
+ND-WF_SkyUK-NAME = WeatherFlow Smart Weather Station Sky (UK)
+ND-WF_SkyUK-ICON = Weather
 ST-139S-GV0-NAME = Last Update
 ST-139S-GV1-NAME = Illumination
 ST-139S-GV2-NAME = UV Index
@@ -63,16 +67,20 @@ ST-139H-GV4-NAME = Sequence
 
 ND-WF_Lightning-NAME = WeatherFlow Smart Weather Station Lightning
 ND-WF_Lightning-ICON = Weather
-ND-WF_LightningSI-NAME = WeatherFlow Smart Weather Station Lightning
-ND-WF_LightningSI-ICON = Weather
+ND-WF_LightningUS-NAME = WeatherFlow Smart Weather Station Lightning
+ND-WF_LightningUS-ICON = Weather
+ND-WF_LightningUK-NAME = WeatherFlow Smart Weather Station Lightning
+ND-WF_LightningUK-ICON = Weather
 ST-139L-GV0-NAME = Time
 ST-139L-GV1-NAME = Distance
 ST-139L-GV2-NAME = Energy
 
 ND-WF_RapidWind-NAME = WeatherFlow Smart Weather Station Rapid Wind
 ND-WF_RapidWind-ICON = Weather
-ND-WF_RapidWindSI-NAME = WeatherFlow Smart Weather Station Rapid Wind
-ND-WF_RapidWindSI-ICON = Weather
+ND-WF_RapidWindUS-NAME = WeatherFlow Smart Weather Station Rapid Wind
+ND-WF_RapidWindUS-ICON = Weather
+ND-WF_RapidWindUK-NAME = WeatherFlow Smart Weather Station Rapid Wind
+ND-WF_RapidWindUK-ICON = Weather
 ST-139R-GV0-NAME = Rapid Wind Direction
 ST-139R-GV1-NAME = Rapid Wind Speed
 
