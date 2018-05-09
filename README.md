@@ -30,6 +30,8 @@ The settings for this node are:
    * The height of the Air sensor above sea level, in meters.
 #### Units
    * Display data in either 'metric', 'US', or 'UK' units.
+#### ListenPort
+   * Port to listen on for WeatherFlow data. Default is port 50222.
 
 
 ## Requirements
@@ -56,6 +58,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.1 05/08/2018
+   - Add ListenPort option to change port we listen on for WeatherFlow data.
 - 0.1.0 04/18/2018
    - Initial version published in the Polyglot node server store
 
