@@ -101,6 +101,10 @@ module.exports = class WFUDP {
 		this.elevation = e;
 	}
 
+	set Port(p) {
+		this.port  = p;
+	}
+
 	// Build a new air object with calculated data.
 	AirCalcs(j) {
 		this.airData['serial_number'] = j.serial_number;

@@ -45,6 +45,13 @@ module.exports = class PolyMQTT {
 		return 0;
 	}
 
+	get ListenPort() {
+		if (this.config.customParams.ListenPort !== undefined) {
+			return this.config.customParams.ListenPort;
+		}
+		return '';
+	}
+
 	LastUpdate(address) {
 		this.LastTime[address] = new Date().getTime();
 	}
@@ -152,6 +159,11 @@ module.exports = class PolyMQTT {
 					this.log('  Elevation  : ' + this.customParams.Elevation);
 				} else {
 					this.newParams['Elevation'] = "0";
+				}
+				if (this.customParams.ListenPort !== undefined) {
+					this.log('  Listening UDP Port  : ' + this.customParams.ListenPort);
+				} else {
+					this.newParams['ListenPort'] = "";
 				}
 
 				this.log('customParams = ' + JSON.stringify(this.customParams));

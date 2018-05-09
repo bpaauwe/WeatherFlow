@@ -147,6 +147,8 @@ em.on('configured', function(Poly) {
 	udp_monitor.Air = doAir;
 	udp_monitor.Sky = doSky;
 	udp_monitor.Elevation = Poly.Elevation;
+	if (Poly.ListenPort != "")
+		udp_monitor.Port = Poly.ListenPort;
 	udp_monitor.Start();
 });
 
