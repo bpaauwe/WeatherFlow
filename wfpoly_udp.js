@@ -20,10 +20,18 @@ module.exports = class WFUDP {
 
 	Start() {
 		this.socket = dgram.createSocket(this.opts);
+		console.log('binding to 0.0.0.0 ' + this.port);
+		this.log('Binding to UDP port ' + this.port);
 		this.socket.bind(this.port);
 
 		var air = this.handleAir;
 		var sky = this.handleSky;
+
+		this.socket.on('error', (err) => {
+			console.log(`UDP error:\n${err.stack}`);
+			this.log(`UDP error:\n${err.stack}`);
+			this.socket.close();
+		});
 
 		//this.socket.on('message', function (data, info, error){
 		this.socket.on('message', (data, info, error) => {
