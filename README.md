@@ -58,6 +58,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.2 07/10/2018
+   - Add logging for the UDP port number used.
+   - Add error trapping and logging for the UDP socket connection
 - 0.1.1 05/08/2018
    - Add ListenPort option to change port we listen on for WeatherFlow data.
 - 0.1.0 04/18/2018
