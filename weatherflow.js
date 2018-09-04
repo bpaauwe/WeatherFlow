@@ -102,38 +102,41 @@ em.on('configured', function(Poly) {
 	// on config.  
 	for(var i = 0; i < nodes.length; i++) {
 		log('node = ' + JSON.stringify(nodes[i]));
+		nd = nodes[i].nodedef;
+		log('Current nodedef = ' + nd);
+		log('Using units: ' + Poly.Units.toLowerCase());
 		if (Poly.Units.toLowerCase() == 'metric') {
-			if (nodes[i].NodeDef != 'WF_Sky') {
+			if (nd == 'WF_SkyUK' || nd == 'WF_SkyUS') {
 				log('Switching ' + nodes[i].name + '  definitions to metric');
 				nodelist[nodes[i].name].NodeDef = 'WF_Sky';
 				nodelist[nodes[i].name].addNode();
 			}
 
-			if (nodes[i].nodedef != 'WF_Air') {
+			if (nd == 'WF_AirUK' || nd == 'WF_AirUS') {
 				log('Switching ' + nodes[i].name + '  definitions to metric');
 				nodelist[nodes[i].name].NodeDef = 'WF_Air';
 				nodelist[nodes[i].name].addNode();
 			}
 		} else if (Poly.Units.toLowerCase() == 'uk') {
-			if (nodes[i].NodeDef != 'WF_SkyUK') {
+			if (nd == 'WF_Sky' || nd == 'WF_SkyUS') {
 				log('Switching ' + nodes[i].name + '  definitions to UK');
 				nodelist[nodes[i].name].NodeDef = 'WF_SkyUK';
 				nodelist[nodes[i].name].addNode();
 			}
 
-			if (nodes[i].nodedef != 'WF_AirUK') {
+			if (nd == 'WF_Air' || nd == 'WF_AirUS') {
 				log('Switching ' + nodes[i].name + '  definitions to UK');
 				nodelist[nodes[i].name].NodeDef = 'WF_AirUK';
 				nodelist[nodes[i].name].addNode();
 			}
 		} else { // US imperial
-			if (nodes[i].nodedef != 'WF_SkyUS') {
+			if (nd == 'WF_SkyUK' || nd == 'WF_Sky') {
 				log('Switching ' + nodes[i].name + ' definitions to imperial');
 				nodelist[nodes[i].name].NodeDef = 'WF_SkyUS';
 				nodelist[nodes[i].name].addNode();
 			}
 
-			if (nodes[i].nodedef != 'WF_AirUS') {
+			if (nd == 'WF_AirUK' || nd == 'WF_Air') {
 				log('Switching ' + nodes[i].name + ' definitions to imperial');
 				nodelist[nodes[i].name].NodeDef = 'WF_AirUS';
 				nodelist[nodes[i].name].addNode();
