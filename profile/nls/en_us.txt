@@ -1,0 +1,118 @@
+# controller
+ND-WeatherFlow-NAME = WeatherFlow station
+ND-WeatherFlow-ICON = Weather
+CMD-ctl-DISCOVER-NAME = Re-Discover
+CMD-ctl-UPDATE_PROFILE-NAME = Update Profile
+CMD-ctl-REMOVE_NOTICES_ALL-NAME = Remove Notices
+ST-ctl-ST-NAME = NodeServer Online
+ST-ctl-BATLVL-NAME = Battery
+
+# mynodetype
+ND-temperature-NAME = Temperatures
+ND-temperature-ICON = Input
+ND-temperatureUK-NAME = Temperatures
+ND-temperatureUK-ICON = Input
+ND-temperatureUS-NAME = Temperatures
+ND-temperatureUS-ICON = Input
+ST-139T-ST-NAME = Temperature
+ST-139T-GV0-NAME = Apparent Temperature
+ST-139T-GV1-NAME = DewPoint
+ST-139T-GV2-NAME = Heat Index
+ST-139T-GV3-NAME = Windchill
+
+ND-humidity-NAME = Humidity
+ND-humidity-ICON = Input
+ST-139H-ST-NAME = Humidity
+
+ND-pressure-NAME = Barometric Pressures
+ND-pressure-ICON = Input
+ND-pressureUK-NAME = Barometric Pressures
+ND-pressureUK-ICON = Input
+ND-pressureUS-NAME = Barometric Pressures
+ND-pressureUS-ICON = Input
+ST-139P-ST-NAME = Absolute Pressure
+ST-139P-GV0-NAME = Relative Pressure
+ST-139P-GV1-NAME = Pressure Trend
+
+ND-wind-NAME = Wind
+ND-wind-ICON = Input
+ND-windUK-NAME = Wind
+ND-windUK-ICON = Input
+ND-windUS-NAME = Wind
+ND-windUS-ICON = Input
+ST-139W-ST-NAME = Wind Speeds
+ST-139W-GV0-NAME = Wind Direction
+ST-139W-GV1-NAME = Gust Speed
+ST-139W-GV2-NAME = Gust Direction
+
+ND-precipitation-NAME = Rainfall
+ND-precipitation-ICON = Input
+ND-precipitationUK-NAME = Rainfall
+ND-precipitationUK-ICON = Input
+ND-precipitationUS-NAME = Rainfall
+ND-precipitationUS-ICON = Input
+ST-139R-ST-NAME = Rain Rate
+ST-139R-GV0-NAME = Hourly Rainfall
+ST-139R-GV1-NAME = Daily Rainfall
+ST-139R-GV2-NAME = Weekly Rainfall
+ST-139R-GV3-NAME = Monthly Rainfall
+ST-139R-GV4-NAME = Yearly Rainfall
+
+ND-light-NAME = Light
+ND-light-ICON = Input
+ST-139L-ST-NAME = UV Index
+ST-139L-GV0-NAME = Solar Radiation
+ST-139L-GV1-NAME = Illumination
+
+ND-lightning-NAME = Lightning Strike
+ND-lightning-ICON = Input
+ND-lightningUK-NAME = Lightning Strike
+ND-lightningUK-ICON = Input
+ND-lightningUS-NAME = Lightning Strike
+ND-lightningUS-ICON = Input
+ST-139S-ST-NAME = Strikes
+ST-139S-GV0-NAME = Distance
+
+EN_RAINTYPE-0 = None
+EN_RAINTYPE-1 = Rain
+EN_RAINTYPE-2 = Hail
+EN_RAINTYPE-3 = Rain & Hail
+
+EN_TREND-0 = Falling
+EN_TREND-1 = Steady
+EN_TREND-2 = Rising
+
+EN_CARDINAL-0 = N
+EN_CARDINAL-1 = NNE
+EN_CARDINAL-2 = NE
+EN_CARDINAL-3 = ENE
+EN_CARDINAL-4 = E
+EN_CARDINAL-5 = ESE
+EN_CARDINAL-6 = SE
+EN_CARDINAL-7 = SSE
+EN_CARDINAL-8 = S
+EN_CARDINAL-9 = SSW
+EN_CARDINAL-10 = SW
+EN_CARDINAL-11 = WSW
+EN_CARDINAL-12 = W
+EN_CARDINAL-13 = WNW
+EN_CARDINAL-14 = NW
+EN_CARDINAL-15 = NNW
+
+EN_WIND_DIRECTION-0 = N
+EN_WIND_DIRECTION-1 = NNE
+EN_WIND_DIRECTION-2 = NE
+EN_WIND_DIRECTION-3 = ENE
+EN_WIND_DIRECTION-4 = E
+EN_WIND_DIRECTION-5 = ESE
+EN_WIND_DIRECTION-6 = SE
+EN_WIND_DIRECTION-7 = SSE
+EN_WIND_DIRECTION-8 = S
+EN_WIND_DIRECTION-9 = SSW
+EN_WIND_DIRECTION-10 = SW
+EN_WIND_DIRECTION-11 = WSW
+EN_WIND_DIRECTION-12 = W
+EN_WIND_DIRECTION-13 = WNW
+EN_WIND_DIRECTION-14 = NW
+EN_WIND_DIRECTION-15 = NNW
+

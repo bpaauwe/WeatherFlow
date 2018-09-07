@@ -1,0 +1,179 @@
+<nodeDefs>
+    <!-- NODE DEF from 5.0 document http://wiki.universal-devices.com/index.php?title=V50_MAIN -->
+    <!-- controller -->
+    <nodeDef id="WeatherFlow" nodeType="139" nls="ctl">
+        <editors />
+        <sts>
+		<st id="ST" editor="bool" />
+		<st id="BATLVL" editor="I_VOLTS" />
+	</sts>
+        <cmds>
+            <sends />
+            <accepts>
+              <cmd id="DISCOVER" />
+              <cmd id="REMOVE_NOTICES_ALL" />
+              <cmd id="UPDATE_PROFILE" />
+            </accepts>
+        </cmds>
+    </nodeDef>
+
+    <!-- mynodetype -->
+    <nodeDef id="temperature" nodeType="139" nls="139T">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_TEMP_C" />
+            <st id="GV0" editor="I_TEMP_C" />
+            <st id="GV1" editor="I_TEMP_C" />
+            <st id="GV2" editor="I_TEMP_C" />
+            <st id="GV3" editor="I_TEMP_C" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="temperatureUK" nodeType="139" nls="139T">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_TEMP_C" />
+            <st id="GV0" editor="I_TEMP_C" />
+            <st id="GV1" editor="I_TEMP_C" />
+            <st id="GV2" editor="I_TEMP_C" />
+            <st id="GV3" editor="I_TEMP_C" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="temperatureUS" nodeType="139" nls="139T">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_TEMP_F" />
+            <st id="GV0" editor="I_TEMP_F" />
+            <st id="GV1" editor="I_TEMP_F" />
+            <st id="GV2" editor="I_TEMP_F" />
+            <st id="GV3" editor="I_TEMP_F" />
+        </sts>
+    </nodeDef>
+
+    <nodeDef id="humidity" nodeType="139" nls="139H">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_HUMIDITY" />
+        </sts>
+    </nodeDef>
+
+    <nodeDef id="pressure" nodeType="139" nls="139P">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_MB" />
+            <st id="GV0" editor="I_MB" />
+            <st id="GV1" editor="I_TREND" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="pressureUK" nodeType="139" nls="139P">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_MB" />
+            <st id="GV0" editor="I_MB" />
+            <st id="GV1" editor="I_TREND" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="pressureUS" nodeType="139" nls="139P">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_INHG" />
+            <st id="GV0" editor="I_INHG" />
+            <st id="GV1" editor="I_TREND" />
+        </sts>
+    </nodeDef>
+
+    <nodeDef id="wind" nodeType="139" nls="139W">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_KPH" />
+            <st id="GV0" editor="I_DEGREE" />
+            <st id="GV1" editor="I_KPH" />
+            <st id="GV2" editor="I_DEGREE" />
+            <st id="GV3" editor="I_KPH" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="windUK" nodeType="139" nls="139W">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_MPH" />
+            <st id="GV0" editor="I_DEGREE" />
+            <st id="GV1" editor="I_MPH" />
+            <st id="GV2" editor="I_DEGREE" />
+            <st id="GV3" editor="I_MPH" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="windUS" nodeType="139" nls="139W">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_MPH" />
+            <st id="GV0" editor="I_DEGREE" />
+            <st id="GV1" editor="I_MPH" />
+            <st id="GV2" editor="I_DEGREE" />
+            <st id="GV3" editor="I_MPH" />
+        </sts>
+    </nodeDef>
+
+    <nodeDef id="precipitation" nodeType="139" nls="139R">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_MMHR" />
+            <st id="GV0" editor="I_MM" />
+            <st id="GV1" editor="I_MM" />
+            <st id="GV2" editor="I_MM" />
+            <st id="GV3" editor="I_MM" />
+            <st id="GV4" editor="I_MM" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="precipitationUK" nodeType="139" nls="139R">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_MMHR" />
+            <st id="GV0" editor="I_MM" />
+            <st id="GV1" editor="I_MM" />
+            <st id="GV2" editor="I_MM" />
+            <st id="GV3" editor="I_MM" />
+            <st id="GV4" editor="I_MM" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="precipitationUS" nodeType="139" nls="139R">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_INHR" />
+            <st id="GV0" editor="I_INCHES" />
+            <st id="GV1" editor="I_INCHES" />
+            <st id="GV2" editor="I_INCHES" />
+            <st id="GV3" editor="I_INCHES" />
+            <st id="GV4" editor="I_INCHES" />
+        </sts>
+    </nodeDef>
+
+    <nodeDef id="light" nodeType="139" nls="139L">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_UV" />
+            <st id="GV0" editor="I_RADIATION" />
+            <st id="GV1" editor="I_LUX" />
+        </sts>
+    </nodeDef>
+
+    <nodeDef id="lightning" nodeType="139" nls="139S">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_STRIKES" />
+            <st id="GV0" editor="I_KM" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="lightningUK" nodeType="139" nls="139S">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_STRIKES" />
+            <st id="GV0" editor="I_MILES" />
+        </sts>
+    </nodeDef>
+    <nodeDef id="lightningUS" nodeType="139" nls="139S">
+        <editors />
+        <sts>
+            <st id="ST" editor="I_STRIKES" />
+            <st id="GV0" editor="I_MILES" />
+        </sts>
+    </nodeDef>
+</nodeDefs>

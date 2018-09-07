@@ -1,5 +1,2 @@
-zip
-node
-npm
-mqtt
-fs-extra
+polyinterface>=2.0.0
+#httplib
