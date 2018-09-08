@@ -73,6 +73,27 @@ class Controller(polyinterface.Controller):
         to override the __init__ method, but if you do, you MUST call super.
         """
         super(Controller, self).__init__(polyglot)
+        self.poly.onConfig(self.process_config)
+
+    def process_config(self, config):
+        # this seems to get called twice for every change, why?
+        # What does config represent?
+        LOGGER.info("process_config: Enter");
+
+        if 'Units' in self.polyConfig['customParams']:
+            self.units = self.polyConfig['customParams']['Units']
+            for node in self.nodes:
+                if (node != 'controller'):
+                    LOGGER.info("Setting node " + node + " to units " + self.units);
+                    self.nodes[node].SetUnits(self.units)
+                    self.addNode(self.nodes[node])
+
+        if 'Elevation' in self.polyConfig['customParams']:
+            self.elevation = self.polyConfig['customParams']['Elevation']
+
+        #typed_params = config.get('typedCustomData')
+        #for param in typed_params:
+        #    LOGGER.info("param = " + typed_params[param]);
 
     def start(self):
         """
@@ -87,6 +108,16 @@ class Controller(polyinterface.Controller):
         LOGGER.info('Starting WeatherFlow Node Server')
         self.check_params()
         self.discover()
+
+        # TODO: Is this where we need to set all the node id's and
+        #       update the nodes to use the right nodedefs?
+        LOGGER.info("Start updating nodes with unit information")
+        for node in self.nodes:
+            if (node != 'controller'):
+                LOGGER.info("Setting node " + node + " to units " + self.units);
+                self.nodes[node].SetUnits(self.units)
+
+        LOGGER.info("Finished updating nodes with unit information")
 
         """
         TODO: Is this where we start the UDP monitor thread?
@@ -179,9 +210,6 @@ class Controller(polyinterface.Controller):
         self.addCustomParam({'UDP Port': self.udp_port,
                     'Units': self.units,
                     'Elevation': self.elevation})
-
-        # TODO: Is this where we need to set all the node id's and
-        #       update the nodes to use the right nodedefs?
 
         # Remove all existing notices
         self.removeNoticesAll()
@@ -285,8 +313,8 @@ class Controller(polyinterface.Controller):
     name = 'WeatherFlow hub'
     address = 'hub'
     stopping = False
-    #id = 'WeatherFlow'
-    id = 'Ambient'
+    id = 'WeatherFlow'
+    hint = 0xffffff
     commands = {
         'DISCOVER': discover,
         'UPDATE_PROFILE': update_profile,
@@ -304,6 +332,7 @@ class Controller(polyinterface.Controller):
 
 class TemperatureNode(polyinterface.Node):
     id = 'temperature'
+    hint = 0xffffff
     units = 'us'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 17},
@@ -314,28 +343,28 @@ class TemperatureNode(polyinterface.Node):
             ]
 
     def SetUnits(self, u):
-        units = u
+        self.units = u
         if (u == 'metric'):  # C
-            drivers[0].uom = 4
-            drivers[1].uom = 4
-            drivers[2].uom = 4
-            drivers[3].uom = 4
-            drivers[4].uom = 4
-            id = 'temperature'
+            self.drivers[0]['uom'] = 4
+            self.drivers[1]['uom'] = 4
+            self.drivers[2]['uom'] = 4
+            self.drivers[3]['uom'] = 4
+            self.drivers[4]['uom'] = 4
+            self.id = 'temperature'
         elif (u == 'uk'):  # C
-            drivers[0].uom = 4 
-            drivers[1].uom = 4
-            drivers[2].uom = 4
-            drivers[3].uom = 4
-            drivers[4].uom = 4
-            id = 'temperatureUK'
+            self.drivers[0]['uom'] = 4 
+            self.drivers[1]['uom'] = 4
+            self.drivers[2]['uom'] = 4
+            self.drivers[3]['uom'] = 4
+            self.drivers[4]['uom'] = 4
+            self.id = 'temperatureUK'
         elif (u == 'us'):   # F
-            drivers[0].uom = 17
-            drivers[1].uom = 17
-            drivers[2].uom = 17
-            drivers[3].uom = 17
-            drivers[4].uom = 17
-            id = 'temperatureUS'
+            self.drivers[0]['uom'] = 17
+            self.drivers[1]['uom'] = 17
+            self.drivers[2]['uom'] = 17
+            self.drivers[3]['uom'] = 17
+            self.drivers[4]['uom'] = 17
+            self.id = 'temperatureUS'
 
     def Dewpoint(self, t, h):
         b = (17.625 * t) / (243.04 + t)
@@ -389,13 +418,19 @@ class TemperatureNode(polyinterface.Node):
 
 class HumidityNode(polyinterface.Node):
     id = 'humidity'
+    hint = 0xffffff
+    units = 'metric'
     drivers = [{'driver': 'ST', 'value': 0, 'uom': 22}]
+
+    def SetUnits(self, u):
+        self.units = u
 
     def setDriver(self, driver, value):
         super(HumidityNode, self).setDriver(driver, value, report=True, force=True)
 
 class PressureNode(polyinterface.Node):
     id = 'pressure'
+    hint = 0xffffff
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 117},  # abs press
@@ -412,17 +447,17 @@ class PressureNode(polyinterface.Node):
         # the node def?
         units = u
         if (u == 'metric'):  # millibar
-            drivers[0].uom = 117
-            drivers[1].uom = 117
-            id = 'pressure'
+            self.drivers[0]['uom'] = 117
+            self.drivers[1]['uom'] = 117
+            self.id = 'pressure'
         elif (u == 'uk'):  # millibar
-            drivers[0].uom = 117 
-            drivers[1].uom = 117
-            id = 'pressureUK'
+            self.drivers[0]['uom'] = 117 
+            self.drivers[1]['uom'] = 117
+            self.id = 'pressureUK'
         elif (u == 'us'):   # inHg
-            drivers[0].uom = 23
-            drivers[1].uom = 23
-            id = 'pressureUS'
+            self.drivers[0]['uom'] = 23
+            self.drivers[1]['uom'] = 23
+            self.id = 'pressureUS'
 
     # convert station pressure in millibars to sealevel pressure
     def toSeaLevel(self, station, elevation):
@@ -468,6 +503,7 @@ class PressureNode(polyinterface.Node):
 
 class WindNode(polyinterface.Node):
     id = 'wind'
+    hint = 0xffffff
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 32},  # speed
@@ -480,20 +516,20 @@ class WindNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
         if (u == 'metric'):
-            drivers[0].uom = 32
-            drivers[2].uom = 32
-            drivers[4].uom = 32
-            id = 'wind'
+            self.drivers[0]['uom'] = 32
+            self.drivers[2]['uom'] = 32
+            self.drivers[4]['uom'] = 32
+            self.id = 'wind'
         elif (u == 'uk'): 
-            drivers[0].uom = 48
-            drivers[2].uom = 48
-            drivers[4].uom = 48
-            id = 'windUK'
+            self.drivers[0]['uom'] = 48
+            self.drivers[2]['uom'] = 48
+            self.drivers[4]['uom'] = 48
+            self.id = 'windUK'
         elif (u == 'us'): 
-            drivers[0].uom = 48
-            drivers[2].uom = 48
-            drivers[4].uom = 48
-            id = 'windUS'
+            self.drivers[0]['uom'] = 48
+            self.drivers[2]['uom'] = 48
+            self.drivers[4]['uom'] = 48
+            self.id = 'windUS'
 
     def setDriver(self, driver, value):
         if (driver == 'ST' or driver == 'GV1' or driver == 'GV3'):
@@ -503,6 +539,7 @@ class WindNode(polyinterface.Node):
 
 class PrecipitationNode(polyinterface.Node):
     id = 'precipitation'
+    hint = 0xffffff
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 24},  # rate
@@ -516,34 +553,40 @@ class PrecipitationNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
         if (u == 'metric'):
-            drivers[0].uom = 82
-            drivers[1].uom = 82
-            id = 'precipitation'
+            self.drivers[0]['uom'] = 82
+            self.drivers[1]['uom'] = 82
+            self.id = 'precipitation'
         elif (u == 'uk'): 
-            drivers[0].uom = 82
-            drivers[1].uom = 82
-            id = 'precipitationUK'
+            self.drivers[0]['uom'] = 82
+            self.drivers[1]['uom'] = 82
+            self.id = 'precipitationUK'
         elif (u == 'us'): 
-            drivers[0].uom = 24
-            drivers[1].uom = 105
-            id = 'precipitationUS'
+            self.drivers[0]['uom'] = 24
+            self.drivers[1]['uom'] = 105
+            self.id = 'precipitationUS'
 
     def setDriver(self, driver, value):
         super(PrecipitationNode, self).setDriver(driver, value, report=True, force=True)
 
 class LightNode(polyinterface.Node):
     id = 'light'
+    units = 'metric'
+    hint = 0xffffff
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 71},  # UV
             {'driver': 'GV0', 'value': 0, 'uom': 74},  # solar radiation
             {'driver': 'GV1', 'value': 0, 'uom': 36},  # Lux
             ]
 
+    def SetUnits(self, u):
+        self.units = u
+
     def setDriver(self, driver, value):
         super(LightNode, self).setDriver(driver, value, report=True, force=True)
 
 class LightningNode(polyinterface.Node):
     id = 'lightning'
+    hint = 0xffffff
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 25},  # Strikes
@@ -553,14 +596,14 @@ class LightningNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
         if (u == 'metric'):
-            drivers[0].uom = 83
-            id = 'lighning'
+            self.drivers[0]['uom'] = 83
+            self.id = 'lighning'
         elif (u == 'uk'): 
-            drivers[0].uom = 115
-            id = 'lighningUK'
+            self.drivers[0]['uom'] = 115
+            self.id = 'lighningUK'
         elif (u == 'us'): 
-            drivers[0].uom = 115
-            id = 'lighningUS'
+            self.drivers[0]['uom'] = 115
+            self.id = 'lighningUS'
 
     def setDriver(self, driver, value):
         if (driver == 'GV0'):
