@@ -1,3 +1,2 @@
 #!/usr/bin/env bash
-/usr/bin/npm install "mqtt" --save
-/usr/bin/npm install "fs-extra" --save
+pip install -r requirements.txt --user
