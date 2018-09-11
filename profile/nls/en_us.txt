@@ -5,7 +5,10 @@ CMD-ctl-DISCOVER-NAME = Re-Discover
 CMD-ctl-UPDATE_PROFILE-NAME = Update Profile
 CMD-ctl-REMOVE_NOTICES_ALL-NAME = Remove Notices
 ST-ctl-ST-NAME = NodeServer Online
-ST-ctl-BATLVL-NAME = Battery
+ST-ctl-GV0-NAME = Air Battery
+ST-ctl-GV1-NAME = Sky Battery
+ST-ctl-GV2-NAME = Air RSSI
+ST-ctl-GV3-NAME = Sky RSSI
 
 # mynodetype
 ND-temperature-NAME = Temperatures
@@ -40,10 +43,11 @@ ND-windUK-NAME = Wind
 ND-windUK-ICON = Input
 ND-windUS-NAME = Wind
 ND-windUS-ICON = Input
-ST-139W-ST-NAME = Wind Speeds
+ST-139W-ST-NAME = Wind Speed
 ST-139W-GV0-NAME = Wind Direction
 ST-139W-GV1-NAME = Gust Speed
 ST-139W-GV2-NAME = Gust Direction
+ST-139W-GV3-NAME = Lull Speed
 
 ND-precipitation-NAME = Rainfall
 ND-precipitation-ICON = Input
