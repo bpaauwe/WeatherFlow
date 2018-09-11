@@ -6,6 +6,7 @@ Copyright (c) 2018 Robert Paauwe
 import polyinterface
 import sys
 import time
+import datetime
 import httplib
 import json
 import socket
@@ -14,65 +15,14 @@ import threading
 import Queue
 
 LOGGER = polyinterface.LOGGER
-"""
-polyinterface has a LOGGER that is created by default and logs to:
-logs/debug.log
-You can use LOGGER.info, LOGGER.warning, LOGGER.debug, LOGGER.error levels as needed.
-"""
 
 class Controller(polyinterface.Controller):
-    """
-    The Controller Class is the primary node from an ISY perspective.
-    It is a Superclass of polyinterface.Node so all methods from
-    polyinterface.Node are available to this class as well.
-
-    Class Variables:
-    self.nodes:     Dictionary of nodes. Includes the Controller node.
-                  Keys are the node addresses
-    self.name:      String name of the node
-    self.address: String Address of Node, must be less than 14 characters
-                  (ISY limitation)
-    self.polyConfig: Full JSON config dictionary received from Polyglot for
-                     the controller Node
-    self.added:     Boolean Confirmed added to ISY as primary node
-    self.config:  Dictionary, this node's Config
-
-    Class Methods (not including the Node methods):
-    start():
-        Once the NodeServer config is received from Polyglot this method
-        is automatically called.
-    addNode(polyinterface.Node, update = False):
-        Adds Node to self.nodes and polyglot/ISY. This is called
-        for you on the controller itself. Update = True overwrites the
-        existing Node data.
-    updateNode(polyinterface.Node):
-        Overwrites the existing node data here and on Polyglot.
-    delNode(address):
-        Deletes a Node from the self.nodes/polyglot and ISY. Address is the
-        Node's Address
-    longPoll():
-        Runs every longPoll seconds (set initially in the server.json or
-        default 10 seconds)
-    shortPoll():
-        Runs every shortPoll seconds (set initially in the server.json or
-        default 30 seconds)
-    query():
-        Queries and reports ALL drivers for ALL nodes to the ISY.
-    getDriver('ST'):
-        gets the current value from Polyglot for driver 'ST' returns a
-        STRING, cast as needed
-    runForever():
-        Easy way to run forever without maxing your CPU or doing some silly
-        'time.sleep' nonsense. this joins the underlying queue query thread
-        and just waits for it to terminate which never happens.
-    """
     def __init__(self, polyglot):
-        """
-        Optional.
-        Super runs all the parent class necessities. You do NOT have
-        to override the __init__ method, but if you do, you MUST call super.
-        """
         super(Controller, self).__init__(polyglot)
+        self.name = 'WeatherFlow'
+        self.address = 'hub'
+        self.primary = self.address
+
         self.poly.onConfig(self.process_config)
 
     def process_config(self, config):
@@ -81,30 +31,26 @@ class Controller(polyinterface.Controller):
         LOGGER.info("process_config: Enter");
 
         if 'Units' in self.polyConfig['customParams']:
-            self.units = self.polyConfig['customParams']['Units']
+            self.units = self.polyConfig['customParams']['Units'].lower()
             for node in self.nodes:
-                if (node != 'controller'):
+                if (node != 'hub' and node != 'controller'):
                     LOGGER.info("Setting node " + node + " to units " + self.units);
                     self.nodes[node].SetUnits(self.units)
                     self.addNode(self.nodes[node])
+                else:
+                    LOGGER.info("Skipping node " + node)
+            LOGGER.info("Finished unit configuration.")
 
         if 'Elevation' in self.polyConfig['customParams']:
             self.elevation = self.polyConfig['customParams']['Elevation']
+
+        LOGGER.info("Finished with configuration.")
 
         #typed_params = config.get('typedCustomData')
         #for param in typed_params:
         #    LOGGER.info("param = " + typed_params[param]);
 
     def start(self):
-        """
-        Optional.
-        Polyglot v2 Interface startup done. Here is where you start your
-        integration.  This will run, once the NodeServer connects to
-        Polyglot and gets it's config.
-        In this example I am calling a discovery method. While this is optional,
-        this is where you should start. No need to Super this method, the parent
-        version does nothing.
-        """
         LOGGER.info('Starting WeatherFlow Node Server')
         self.check_params()
         self.discover()
@@ -119,10 +65,6 @@ class Controller(polyinterface.Controller):
 
         LOGGER.info("Finished updating nodes with unit information")
 
-        """
-        TODO: Is this where we start the UDP monitor thread?
-        What is the index for the node array?
-        """
         LOGGER.info('starting thread for UDP data')
         threading.Thread(target = self.udp_data).start()
         #for node in self.nodes:
@@ -130,13 +72,6 @@ class Controller(polyinterface.Controller):
         LOGGER.info('WeatherFlow Node Server Started.')
 
     def shortPoll(self):
-        """
-        Optional.
-        This runs every 10 seconds. You would probably update your nodes
-        either here or longPoll. No need to Super this method the parent
-        version does nothing.
-        The timer can be overriden in the server.json.
-        """
         pass
 
     def longPoll(self):
@@ -147,9 +82,6 @@ class Controller(polyinterface.Controller):
         """
 
     def query(self):
-        """
-                Report status of all nodes
-        """
         for node in self.nodes:
             self.nodes[node].reportDrivers()
 
@@ -173,10 +105,6 @@ class Controller(polyinterface.Controller):
         self.addNode(LightningNode(self, self.address, 'lightning', 'Lightning'))
 
     def delete(self):
-        """
-        Example
-        This is sent by Polyglot upon deletion of the NodeServer.
-        """
         self.stopping = True
         LOGGER.info('Removing WeatherFlow node server.')
 
@@ -197,7 +125,7 @@ class Controller(polyinterface.Controller):
             self.udp_port = default_port
 
         if 'Units' in self.polyConfig['customParams']:
-            self.units = self.polyConfig['customParams']['Units']
+            self.units = self.polyConfig['customParams']['Units'].lower()
         else:
             self.units = default_units
 
@@ -273,6 +201,8 @@ class Controller(polyinterface.Controller):
                 self.nodes['lightning'].setDriver('ST', ls)
                 self.nodes['lightning'].setDriver('GV0', ld)
 
+                self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
+
 
             if (data["type"] == "obs_sky"):
                 # process sky data
@@ -283,6 +213,7 @@ class Controller(polyinterface.Controller):
                 ws = data['obs'][0][5] * (18 / 5) # wind speed
                 wg = data['obs'][0][6] * (18 / 5) # wind gust
                 wd = data['obs'][0][7]  # wind direction
+                it = data['obs'][0][9]  # reporting interval
                 sr = data['obs'][0][10]  # solar radiation
 
                 windspeed = ws
@@ -290,43 +221,54 @@ class Controller(polyinterface.Controller):
                 self.nodes['wind'].setDriver('ST', ws)
                 self.nodes['wind'].setDriver('GV0', wd)
                 self.nodes['wind'].setDriver('GV1', wg)
-                #self.nodes['wind'].setDriver('GV2', d['windgustdir'])
+                self.nodes['wind'].setDriver('GV2', wd)
                 self.nodes['wind'].setDriver('GV3', wl)
 
                 self.nodes['light'].setDriver('ST', uv)
                 self.nodes['light'].setDriver('GV0', sr)
+                self.nodes['light'].setDriver('GV1', il)
 
+                rr = (rr * 60) / it
                 self.nodes['rain'].setDriver('ST', rr)
-                #TODO: track daily rain amount
-                #self.nodes['rain'].setDriver('GV1', rd)
+
+                rh = self.nodes['rain'].hourly_accumulation(rr)
+                self.nodes['rain'].setDriver('GV1', rh)
+                rd = self.nodes['rain'].daily_accumulation(rr)
+                self.nodes['rain'].setDriver('GV2', rd)
+                #self.nodes['rain'].setDriver('GV3', 10.2)
+
+                self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
+
+            if (data["type"] == "device_status"):
+                if "AR" in data["serial_number"]:
+                    self.setDriver('GV2', data['rssi'], report=True, force=True)
+                if "SK" in data["serial_number"]:
+                    self.setDriver('GV3', data['rssi'], report=True, force=True)
+
+            #if (data["type"] == "hub_status"):
+
+    def SetUnits(self, u):
+        self.units = u
 
 
-    """
-    Optional.
-    Since the controller is the parent node in ISY, it will actual show up
-    as a node.  So it needs to know the drivers and what id it will use.
-    The drivers are the defaults in the parent Class, so you don't need
-    them unless you want to add to them. The ST and GV1 variables are for
-    reporting status through Polyglot to ISY, DO NOT remove them. UOM 2
-    is boolean.
-    """
-    name = 'WeatherFlow hub'
+    id = 'WeatherFlow'
+    name = 'WeatherFlow'
     address = 'hub'
     stopping = False
-    id = 'WeatherFlow'
     hint = 0xffffff
+    units = 'metric'
     commands = {
         'DISCOVER': discover,
         'UPDATE_PROFILE': update_profile,
         'REMOVE_NOTICES_ALL': remove_notices_all
     }
-    """
-    Hub status information here, maybe?
-    Or device battery levels?
-    """
+    # Hub status information here: battery and rssi values.
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 2},
-            {'driver': 'BATLVL', 'value': 0, 'uom': 72}  # battery level
+            {'driver': 'GV0', 'value': 0, 'uom': 72},  # Air battery level
+            {'driver': 'GV1', 'value': 0, 'uom': 72},  # Sky battery level
+            {'driver': 'GV2', 'value': 0, 'uom': 25},  # Air RSSI
+            {'driver': 'GV3', 'value': 0, 'uom': 25}   # Sky RSSI
             ]
 
 
@@ -411,8 +353,9 @@ class TemperatureNode(polyinterface.Node):
 
     def setDriver(self, driver, value):
         if (self.units == "us"):
-            value = round((value * 1.8) + 32, 1)  # convert to F
-        super(TemperatureNode, self).setDriver(driver, value, report=True, force=True)
+            value = (value * 1.8) + 32  # convert to F
+
+        super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True, force=True)
 
 
 
@@ -445,7 +388,7 @@ class PressureNode(polyinterface.Node):
         # can we dynmically set the drivers here also?
         # what about the ID, can we dynamically change that to change
         # the node def?
-        units = u
+        self.units = u
         if (u == 'metric'):  # millibar
             self.drivers[0]['uom'] = 117
             self.drivers[1]['uom'] = 117
@@ -497,7 +440,7 @@ class PressureNode(polyinterface.Node):
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
         if (self.units == 'us'):
-            value *= 0.02952998751
+            value = round(value * 0.02952998751, 3)
         super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 
 
@@ -542,30 +485,81 @@ class PrecipitationNode(polyinterface.Node):
     hint = 0xffffff
     units = 'metric'
     drivers = [
-            {'driver': 'ST', 'value': 0, 'uom': 24},  # rate
-            {'driver': 'GV0', 'value': 0, 'uom': 105}, # daily
+            {'driver': 'ST', 'value': 0, 'uom': 46},  # rate
+            {'driver': 'GV0', 'value': 0, 'uom': 82}, # hourly
+            {'driver': 'GV1', 'value': 0, 'uom': 82}, # daily
+            {'driver': 'GV2', 'value': 0, 'uom': 82}, # weekly
+            {'driver': 'GV3', 'value': 0, 'uom': 82}, # monthly
+            {'driver': 'GV4', 'value': 0, 'uom': 82}  # yearly
             ]
+    hourly_rain = 0
     daily_rain = 0
     weekly_rain = 0
     monthly_rain = 0
     yearly_rain = 0
 
+    prev_hour = 0
+    prev_day = 0
+    prev_week = 0
+
     def SetUnits(self, u):
         self.units = u
         if (u == 'metric'):
-            self.drivers[0]['uom'] = 82
+            self.drivers[0]['uom'] = 46
             self.drivers[1]['uom'] = 82
+            self.drivers[2]['uom'] = 82
+            self.drivers[3]['uom'] = 82
+            self.drivers[4]['uom'] = 82
+            self.drivers[5]['uom'] = 82
             self.id = 'precipitation'
         elif (u == 'uk'): 
-            self.drivers[0]['uom'] = 82
+            self.drivers[0]['uom'] = 46
             self.drivers[1]['uom'] = 82
+            self.drivers[2]['uom'] = 82
+            self.drivers[3]['uom'] = 82
+            self.drivers[4]['uom'] = 82
+            self.drivers[5]['uom'] = 82
             self.id = 'precipitationUK'
         elif (u == 'us'): 
             self.drivers[0]['uom'] = 24
             self.drivers[1]['uom'] = 105
+            self.drivers[2]['uom'] = 105
+            self.drivers[3]['uom'] = 105
+            self.drivers[4]['uom'] = 105
+            self.drivers[5]['uom'] = 105
             self.id = 'precipitationUS'
 
+    def hourly_accumulation(self, r):
+        current_hour = datetime.datetime.now().hour
+        if (current_hour != self.prev_hour):
+            self.prev_hour = current_hour
+            self.hourly = 0
+
+        self.hourly_rain += r
+        return self.hourly_rain
+
+    def daily_accumulation(self, r):
+        current_day = datetime.datetime.now().day
+        if (current_day != self.prev_day):
+            self.prev_day = current_day
+            self.daily_rain = 0
+
+        self.daily_rain += r
+        return self.daily_rain
+
+    def weekly_accumulation(self, r):
+        current_week = datetime.datetime.now().day
+        if (current_weekday != self.prev_weekday):
+            self.prev_week = current_weekday
+            self.weekly_rain = 0
+
+        self.weekly_rain += r
+        return self.weekly_rain
+
+        
     def setDriver(self, driver, value):
+        if (self.units == 'us'):
+            value = round(value * 0.03937, 2)
         super(PrecipitationNode, self).setDriver(driver, value, report=True, force=True)
 
 class LightNode(polyinterface.Node):
@@ -596,14 +590,17 @@ class LightningNode(polyinterface.Node):
     def SetUnits(self, u):
         self.units = u
         if (u == 'metric'):
-            self.drivers[0]['uom'] = 83
-            self.id = 'lighning'
+            self.drivers[0]['uom'] = 25
+            self.drivers[1]['uom'] = 83
+            self.id = 'lightning'
         elif (u == 'uk'): 
-            self.drivers[0]['uom'] = 115
-            self.id = 'lighningUK'
+            self.drivers[0]['uom'] = 25
+            self.drivers[1]['uom'] = 116
+            self.id = 'lightningUK'
         elif (u == 'us'): 
-            self.drivers[0]['uom'] = 115
-            self.id = 'lighningUS'
+            self.drivers[0]['uom'] = 25
+            self.drivers[1]['uom'] = 116
+            self.id = 'lightningUS'
 
     def setDriver(self, driver, value):
         if (driver == 'GV0'):
