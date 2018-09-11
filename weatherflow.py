@@ -162,7 +162,7 @@ class Controller(polyinterface.Controller):
         LOGGER.info("Starting UDP receive loop")
         while self.stopping == False:
             hub = s.recvfrom(1024)
-            data = json.loads(hub[0]) # hub is a truple (json, ip, port)
+            data = json.loads(hub[0].decode("utf-8")) # hub is a truple (json, ip, port)
 
             """
             Depending on the type of data recieved, process it and
