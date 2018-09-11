@@ -119,8 +119,8 @@ class Controller(polyinterface.Controller):
         default_port = 50222
         default_elevation = 0
         default_units = "metric"
-        if 'UDP Port' in self.polyConfig['customParams']:
-            self.udp_port = self.polyConfig['customParams']['UDP Port']
+        if 'ListenPort' in self.polyConfig['customParams']:
+            self.udp_port = self.polyConfig['customParams']['ListenPort']
         else:
             self.udp_port = default_port
 
@@ -135,7 +135,7 @@ class Controller(polyinterface.Controller):
             self.elevation = default_elevation
 
         # Make sure they are in the params
-        self.addCustomParam({'UDP Port': self.udp_port,
+        self.addCustomParam({'ListenPort': self.udp_port,
                     'Units': self.units,
                     'Elevation': self.elevation})
 
