@@ -1,7 +1,7 @@
 {
     "name": "WeatherFlowPoly",
     "docs": "http;//www.bobsplace.com/release/WFNodeserver",
-    "type": "python",
+    "type": "python3",
     "executable": "weatherflow.py",
     "install": "install.sh",
     "description": "Add WeatherFlow weather data to the ISY994",

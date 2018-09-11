@@ -1,2 +1,2 @@
-polyinterface>=2.0.0
-#httplib
+polyinterface>=2.0.28
+urllib3>=1.23

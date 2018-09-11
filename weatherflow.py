@@ -7,12 +7,11 @@ import polyinterface
 import sys
 import time
 import datetime
-import httplib
+import urllib3
 import json
 import socket
 import math
 import threading
-import Queue
 
 LOGGER = polyinterface.LOGGER
 
@@ -380,7 +379,6 @@ class PressureNode(polyinterface.Node):
             {'driver': 'GV0', 'value': 0, 'uom': 117}, # rel press
             {'driver': 'GV1', 'value': 0, 'uom': 25}  # trend
             ]
-    trend = Queue.Queue(maxsize=180) # 3 hours worth of data
     mytrend = []
 
 
