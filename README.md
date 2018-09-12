@@ -56,6 +56,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.5 09/11/2018
+   - Fix bug in UDP JSON parsing related to migration to python3
 - 0.1.4 09/10/2018
    - Convert this to a python program instead of a node.js program
 - 0.1.3 09/04/2018
