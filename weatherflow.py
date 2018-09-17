@@ -21,6 +21,7 @@ class Controller(polyinterface.Controller):
         self.name = 'WeatherFlow'
         self.address = 'hub'
         self.primary = self.address
+        self.hb = 0
 
         self.poly.onConfig(self.process_config)
 
@@ -79,6 +80,7 @@ class Controller(polyinterface.Controller):
                 we wanted to use that method to get data. But currently
                 we get data via the local UDP broadcasts.
         """
+        self.heartbeat()
 
     def query(self):
         for node in self.nodes:
@@ -102,6 +104,15 @@ class Controller(polyinterface.Controller):
         self.addNode(PrecipitationNode(self, self.address, 'rain', 'Precipitation'))
         self.addNode(LightNode(self, self.address, 'light', 'Illumination'))
         self.addNode(LightningNode(self, self.address, 'lightning', 'Lightning'))
+
+    def heartbeat(self):
+        LOGGER.debug('heartbeat hb={}'.format(self.hb))
+        if self.hb == 0:
+            self.reportCmd("DON",2)
+            self.hb = 1
+        else:
+            self.reportCmd("DOF",2)
+            self.hb = 0
 
     def delete(self):
         self.stopping = True
@@ -167,7 +178,7 @@ class Controller(polyinterface.Controller):
             """
             Depending on the type of data recieved, process it and
             update the correct node.
-                                indexes are lower case names. I.E. 
+                                indexes are lower case names. I.E.
                                 self.nodes['temperature']
             """
             if (data["type"] == "obs_air"):
@@ -293,7 +304,7 @@ class TemperatureNode(polyinterface.Node):
             self.drivers[4]['uom'] = 4
             self.id = 'temperature'
         elif (u == 'uk'):  # C
-            self.drivers[0]['uom'] = 4 
+            self.drivers[0]['uom'] = 4
             self.drivers[1]['uom'] = 4
             self.drivers[2]['uom'] = 4
             self.drivers[3]['uom'] = 4
@@ -392,7 +403,7 @@ class PressureNode(polyinterface.Node):
             self.drivers[1]['uom'] = 117
             self.id = 'pressure'
         elif (u == 'uk'):  # millibar
-            self.drivers[0]['uom'] = 117 
+            self.drivers[0]['uom'] = 117
             self.drivers[1]['uom'] = 117
             self.id = 'pressureUK'
         elif (u == 'us'):   # inHg
@@ -461,12 +472,12 @@ class WindNode(polyinterface.Node):
             self.drivers[2]['uom'] = 32
             self.drivers[4]['uom'] = 32
             self.id = 'wind'
-        elif (u == 'uk'): 
+        elif (u == 'uk'):
             self.drivers[0]['uom'] = 48
             self.drivers[2]['uom'] = 48
             self.drivers[4]['uom'] = 48
             self.id = 'windUK'
-        elif (u == 'us'): 
+        elif (u == 'us'):
             self.drivers[0]['uom'] = 48
             self.drivers[2]['uom'] = 48
             self.drivers[4]['uom'] = 48
@@ -510,7 +521,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[4]['uom'] = 82
             self.drivers[5]['uom'] = 82
             self.id = 'precipitation'
-        elif (u == 'uk'): 
+        elif (u == 'uk'):
             self.drivers[0]['uom'] = 46
             self.drivers[1]['uom'] = 82
             self.drivers[2]['uom'] = 82
@@ -518,7 +529,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[4]['uom'] = 82
             self.drivers[5]['uom'] = 82
             self.id = 'precipitationUK'
-        elif (u == 'us'): 
+        elif (u == 'us'):
             self.drivers[0]['uom'] = 24
             self.drivers[1]['uom'] = 105
             self.drivers[2]['uom'] = 105
@@ -554,7 +565,7 @@ class PrecipitationNode(polyinterface.Node):
         self.weekly_rain += r
         return self.weekly_rain
 
-        
+
     def setDriver(self, driver, value):
         if (self.units == 'us'):
             value = round(value * 0.03937, 2)
@@ -591,11 +602,11 @@ class LightningNode(polyinterface.Node):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 83
             self.id = 'lightning'
-        elif (u == 'uk'): 
+        elif (u == 'uk'):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 116
             self.id = 'lightningUK'
-        elif (u == 'us'): 
+        elif (u == 'us'):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 116
             self.id = 'lightningUS'

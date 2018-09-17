@@ -15,7 +15,7 @@ This node server is intended to support the [WeatherFlow Smart Weather Station](
 3. Add NodeServer in Polyglot Web
    * After the install completes, Polyglot will reboot your ISY, you can watch the status in the main polyglot log.
 4. Once your ISY is back up open the Admin Console.
-5. The node server should automatically run and find your hub(s) and start adding weather sensors.  It can take a couple of minutes to discover the sensors. Verify by checking the nodeserver log. 
+5. The node server should automatically run and find your hub(s) and start adding weather sensors.  It can take a couple of minutes to discover the sensors. Verify by checking the nodeserver log.
    * While this is running you can view the nodeserver log in the Polyglot UI to see what it's doing
 6. This should find your Air/Sky sensors and add them to the ISY with all the sensor values.
 
@@ -25,7 +25,7 @@ The settings for this node are:
 #### Short Poll
    * This is how often it will update the last update time for each node.
 #### Long Poll
-   * Not currently used
+   * Sends a heartbeat as DON/DOF
 #### Elevation
    * The height of the Air sensor above sea level, in meters.
 #### Units
@@ -56,12 +56,14 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.6 09/16/2018
+  - JimBo: Send DON/DOF for heartbeta
 - 0.1.5 09/11/2018
    - Fix bug in UDP JSON parsing related to migration to python3
 - 0.1.4 09/10/2018
    - Convert this to a python program instead of a node.js program
 - 0.1.3 09/04/2018
-   - Fix bug in NodeDef selections. 
+   - Fix bug in NodeDef selections.
 - 0.1.2 07/10/2018
    - Add logging for the UDP port number used.
    - Add error trapping and logging for the UDP socket connection

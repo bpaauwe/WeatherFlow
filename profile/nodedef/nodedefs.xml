@@ -11,7 +11,10 @@
 		<st id="GV3" editor="I_RSSI" />
 	</sts>
         <cmds>
-            <sends />
+           <sends>
+             <cmd id="DON" />
+             <cmd id="DOF" />
+           </sends>
             <accepts>
               <cmd id="DISCOVER" />
               <cmd id="REMOVE_NOTICES_ALL" />

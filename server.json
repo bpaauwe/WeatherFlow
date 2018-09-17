@@ -8,12 +8,12 @@
     "notice": "see http://www.weatherflow.com for more information",
     "shortPoll": "5",
     "longPoll": "60",
-    "profile_version": "0.1.1",
+    "profile_version": "0.1.6",
     "credits": [
     	{
     		"title": "WeatherFlow: A node.js library for WeatherFlow",
     		"author": "Bob Paauwe",
-    		"version": "0.1.5",
+    		"version": "0.1.6",
     		"date": "September 10, 2018",
     		"source": "https://github.com/bpaauwe/WeatherFlow",
             "license": "https://github.com/bpaauwe/WeatherFlow/LICENSE"
