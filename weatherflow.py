@@ -368,7 +368,7 @@ class Controller(polyinterface.Controller):
     }
     # Hub status information here: battery and rssi values.
     drivers = [
-            {'driver': 'ST', 'value': 0, 'uom': 2},
+            {'driver': 'ST', 'value': 1, 'uom': 2},
             {'driver': 'GV0', 'value': 0, 'uom': 72},  # Air battery level
             {'driver': 'GV1', 'value': 0, 'uom': 72},  # Sky battery level
             {'driver': 'GV2', 'value': 0, 'uom': 25},  # Air RSSI
