@@ -58,6 +58,7 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 - 0.1.6 09/16/2018
   - JimBo: Send DON/DOF for heartbeta
+  - JimBo: Set initial Controller ST default to 1
 - 0.1.5 09/11/2018
    - Fix bug in UDP JSON parsing related to migration to python3
 - 0.1.4 09/10/2018
