@@ -9,6 +9,7 @@ ST-ctl-GV0-NAME = Air Battery
 ST-ctl-GV1-NAME = Sky Battery
 ST-ctl-GV2-NAME = Air RSSI
 ST-ctl-GV3-NAME = Sky RSSI
+ST-ctl-GV4-NAME = Hub Seconds Since Seen
 
 # mynodetype
 ND-temperature-NAME = Temperatures
@@ -119,4 +120,3 @@ EN_WIND_DIRECTION-12 = W
 EN_WIND_DIRECTION-13 = WNW
 EN_WIND_DIRECTION-14 = NW
 EN_WIND_DIRECTION-15 = NNW
-

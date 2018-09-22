@@ -58,6 +58,7 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 - 0.1.8 09/16/2018
   - JimBo: Send DON/DOF for heartbeta
+  - JimBo: Set Hub Seconds Since Seen
 - 0.1.7 09/26/2018
    - Add some error trapping in the config change handler
    - Make sure the configuration values are set before trying to use them

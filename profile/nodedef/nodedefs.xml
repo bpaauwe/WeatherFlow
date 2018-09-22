@@ -9,6 +9,7 @@
 		<st id="GV1" editor="I_VOLTS" />
 		<st id="GV2" editor="I_RSSI" />
 		<st id="GV3" editor="I_RSSI" />
+		<st id="GV4" editor="I_SECONDS" />
 	</sts>
         <cmds>
            <sends>
