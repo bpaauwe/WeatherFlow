@@ -22,7 +22,7 @@ class Controller(polyinterface.Controller):
         self.address = 'hub'
         self.primary = self.address
         self.hb = 0
-
+        self.hub_timestamp = 0
         self.poly.onConfig(self.process_config)
 
     def process_config(self, config):
@@ -81,10 +81,12 @@ class Controller(polyinterface.Controller):
                 we get data via the local UDP broadcasts.
         """
         self.heartbeat()
+        self.set_hub_timestamp()
 
     def query(self):
         for node in self.nodes:
             self.nodes[node].reportDrivers()
+        self.set_hub_timestamp()
 
     def discover(self, *args, **kwargs):
         """
@@ -113,6 +115,11 @@ class Controller(polyinterface.Controller):
         else:
             self.reportCmd("DOF",2)
             self.hb = 0
+
+    def set_hub_timestamp(self):
+        s = int(time.time() - self.hub_timestamp)
+        LOGGER.debug("set_hub_timestamp: {}".format(s))
+        self.setDriver('GV4', s)
 
     def delete(self):
         self.stopping = True
@@ -255,7 +262,12 @@ class Controller(polyinterface.Controller):
                 if "SK" in data["serial_number"]:
                     self.setDriver('GV3', data['rssi'], report=True, force=True)
 
-            #if (data["type"] == "hub_status"):
+            if (data["type"] == "hub_status"):
+                # This comes every 10 seconds, but we only update the driver
+                # during longPoll, so just save it.
+                #LOGGER.debug("hub_status: time={} {}".format(time.time(),data))
+                if "timestamp" in data:
+                    self.hub_timestamp = data['timestamp']
 
     def SetUnits(self, u):
         self.units = u
@@ -278,7 +290,8 @@ class Controller(polyinterface.Controller):
             {'driver': 'GV0', 'value': 0, 'uom': 72},  # Air battery level
             {'driver': 'GV1', 'value': 0, 'uom': 72},  # Sky battery level
             {'driver': 'GV2', 'value': 0, 'uom': 25},  # Air RSSI
-            {'driver': 'GV3', 'value': 0, 'uom': 25}   # Sky RSSI
+            {'driver': 'GV3', 'value': 0, 'uom': 25},  # Sky RSSI
+            {'driver': 'GV4', 'value': 0, 'uom': 25}   # Hub seconds since seen
             ]
 
 
