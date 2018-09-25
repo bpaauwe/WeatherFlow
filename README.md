@@ -56,6 +56,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.6 09/25/2018
+   - Fix bug in rain accumulation.
 - 0.1.5 09/11/2018
    - Fix bug in UDP JSON parsing related to migration to python3
 - 0.1.4 09/10/2018
