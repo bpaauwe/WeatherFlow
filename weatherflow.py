@@ -207,7 +207,7 @@ class Controller(polyinterface.Controller):
                 # process sky data
                 il = data['obs'][0][1]  # Illumination
                 uv = data['obs'][0][2]  # UV Index
-                rr = data['obs'][0][3]  # rain
+                ra = float(data['obs'][0][3])  # rain
                 wl = data['obs'][0][4] * (18 / 5) # wind lull
                 ws = data['obs'][0][5] * (18 / 5) # wind speed
                 wg = data['obs'][0][6] * (18 / 5) # wind gust
@@ -227,13 +227,19 @@ class Controller(polyinterface.Controller):
                 self.nodes['light'].setDriver('GV0', sr)
                 self.nodes['light'].setDriver('GV1', il)
 
-                rr = (rr * 60) / it
+                rr = (ra * 60) / it
                 self.nodes['rain'].setDriver('ST', rr)
 
-                rh = self.nodes['rain'].hourly_accumulation(rr)
-                self.nodes['rain'].setDriver('GV1', rh)
-                rd = self.nodes['rain'].daily_accumulation(rr)
-                self.nodes['rain'].setDriver('GV2', rd)
+                r = self.nodes['rain'].hourly_accumulation(ra)
+                self.nodes['rain'].setDriver('GV0', r)
+                r = self.nodes['rain'].daily_accumulation(ra)
+                self.nodes['rain'].setDriver('GV1', r)
+                r = self.nodes['rain'].weekly_accumulation(ra)
+                self.nodes['rain'].setDriver('GV2', r)
+                r = self.nodes['rain'].monthly_accumulation(ra)
+                self.nodes['rain'].setDriver('GV3', r)
+                r = self.nodes['rain'].yearly_accumulation(ra)
+                self.nodes['rain'].setDriver('GV4', r)
                 #self.nodes['rain'].setDriver('GV3', 10.2)
 
                 self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
@@ -499,6 +505,8 @@ class PrecipitationNode(polyinterface.Node):
     prev_hour = 0
     prev_day = 0
     prev_week = 0
+    prev_month = 0
+    prev_year = 0
 
     def SetUnits(self, u):
         self.units = u
@@ -546,13 +554,31 @@ class PrecipitationNode(polyinterface.Node):
         return self.daily_rain
 
     def weekly_accumulation(self, r):
-        current_week = datetime.datetime.now().day
-        if (current_weekday != self.prev_weekday):
-            self.prev_week = current_weekday
-            self.weekly_rain = 0
+        if datetime.datetime.now().weekday == 0:
+            if datetime.datetime.now().hour == 0:
+                if datetime.datetime.now().minute == 0:
+                    self.weekly_rain = 0
 
         self.weekly_rain += r
         return self.weekly_rain
+
+    def monthly_accumulation(self, r):
+        current_month = datetime.datetime.now().month
+        if (current_month != self.prev_month):
+            self.prev_month = current_month
+            self.monthly_rain = 0
+
+        self.monthly_rain += r
+        return self.monthly_rain
+
+    def yearly_accumulation(self, r):
+        current_year = datetime.datetime.now().year
+        if (current_year != self.prev_year):
+            self.prev_year = current_year
+            self.yearly_rain = 0
+
+        self.yearly_rain += r
+        return self.yearly_rain
 
         
     def setDriver(self, driver, value):
