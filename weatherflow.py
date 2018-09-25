@@ -21,6 +21,18 @@ class Controller(polyinterface.Controller):
         self.name = 'WeatherFlow'
         self.address = 'hub'
         self.primary = self.address
+        self.rain_data = {
+                'hourly': 0,
+                'hour' : 0,
+                'daily': 0,
+                'day': 0,
+                'weekly': 0,
+                'week': 0,
+                'monthly': 0,
+                'month': 0,
+                'yearly': 0,
+                'year': 0,
+                }
 
         self.poly.onConfig(self.process_config)
 
@@ -102,6 +114,20 @@ class Controller(polyinterface.Controller):
         self.addNode(PrecipitationNode(self, self.address, 'rain', 'Precipitation'))
         self.addNode(LightNode(self, self.address, 'light', 'Illumination'))
         self.addNode(LightningNode(self, self.address, 'lightning', 'Lightning'))
+
+        
+        if 'customData' in self.polyConfig:
+            LOGGER.info('Restoring rain accumulation data')
+            self.rain_data['hourly'] = self.polyConfig['customData']['hourly']
+            self.rain_data['daily'] = self.polyConfig['customData']['daily']
+            self.rain_data['weekly'] = self.polyConfig['customData']['weekly']
+            self.rain_data['monthly'] = self.polyConfig['customData']['monthly']
+            self.rain_data['yearly'] = self.polyConfig['customData']['yearly']
+            self.rain_data['hour'] = self.polyConfig['customData']['hour']
+            self.rain_data['day'] = self.polyConfig['customData']['day']
+            self.rain_data['month'] = self.polyConfig['customData']['month']
+            self.rain_data['year'] = self.polyConfig['customData']['year']
+            self.nodes['rain'].InitializeRain(self.rain_data)
 
     def delete(self):
         self.stopping = True
@@ -227,20 +253,28 @@ class Controller(polyinterface.Controller):
                 self.nodes['light'].setDriver('GV0', sr)
                 self.nodes['light'].setDriver('GV1', il)
 
+                rain = self.nodes['rain']
                 rr = (ra * 60) / it
-                self.nodes['rain'].setDriver('ST', rr)
+                rain.setDriver('ST', rr)
 
-                r = self.nodes['rain'].hourly_accumulation(ra)
-                self.nodes['rain'].setDriver('GV0', r)
-                r = self.nodes['rain'].daily_accumulation(ra)
-                self.nodes['rain'].setDriver('GV1', r)
-                r = self.nodes['rain'].weekly_accumulation(ra)
-                self.nodes['rain'].setDriver('GV2', r)
-                r = self.nodes['rain'].monthly_accumulation(ra)
-                self.nodes['rain'].setDriver('GV3', r)
-                r = self.nodes['rain'].yearly_accumulation(ra)
-                self.nodes['rain'].setDriver('GV4', r)
-                #self.nodes['rain'].setDriver('GV3', 10.2)
+                self.rain_data['hourly'] = rain.hourly_accumulation(ra)
+                self.rain_data['daily'] = rain.daily_accumulation(ra)
+                self.rain_data['weekly'] = rain.weekly_accumulation(ra)
+                self.rain_data['monthly'] = rain.monthly_accumulation(ra)
+                self.rain_data['yearly'] = rain.yearly_accumulation(ra)
+
+                self.rain_data['hour'] = datetime.datetime.now().hour
+                self.rain_data['day'] = datetime.datetime.now().day
+                self.rain_data['month'] = datetime.datetime.now().month
+                self.rain_data['year'] = datetime.datetime.now().year
+
+                rain.setDriver('GV0', self.rain_data['hourly'])
+                rain.setDriver('GV1', self.rain_data['daily'])
+                rain.setDriver('GV2', self.rain_data['weekly'])
+                rain.setDriver('GV3', self.rain_data['monthly'])
+                rain.setDriver('GV4', self.rain_data['yearly'])
+
+                self.poly.saveCustomData(self.rain_data)
 
                 self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
 
@@ -507,6 +541,19 @@ class PrecipitationNode(polyinterface.Node):
     prev_week = 0
     prev_month = 0
     prev_year = 0
+
+    def InitializeRain(self, acc):
+        self.daily_rain = acc['daily']
+        self.houry_rain = acc['hourly']
+        self.weeky_rain = acc['weekly']
+        self.monthly_rain = acc['monthly']
+        self.yeary_rain = acc['yearly']
+
+        self.prev_hour = acc['hour']
+        self.prev_day = acc['day']
+        self.prev_week = acc['week']
+        self.prev_month = acc['month']
+        self.prev_year = acc['year']
 
     def SetUnits(self, u):
         self.units = u
