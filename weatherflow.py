@@ -70,16 +70,6 @@ class Controller(polyinterface.Controller):
         self.check_params()
         self.discover()
 
-        # TODO: Is this where we need to set all the node id's and
-        #       update the nodes to use the right nodedefs?
-        LOGGER.info("Start updating nodes with unit information")
-        for node in self.nodes:
-            if (node != 'controller'):
-                LOGGER.info("Setting node " + node + " to units " + self.units);
-                self.nodes[node].SetUnits(self.units)
-
-        LOGGER.info("Finished updating nodes with unit information")
-
         LOGGER.info('starting thread for UDP data')
         threading.Thread(target = self.udp_data).start()
         #for node in self.nodes:
@@ -111,13 +101,29 @@ class Controller(polyinterface.Controller):
                 - Light (UV, solar radiation, lux)
                 - Lightning (strikes, distance)
         """
-        self.addNode(TemperatureNode(self, self.address, 'temperature', 'Temperatures'))
-        self.addNode(HumidityNode(self, self.address, 'humidity', 'Humidity'))
-        self.addNode(PressureNode(self, self.address, 'pressure', 'Barometric Pressure'))
-        self.addNode(WindNode(self, self.address, 'wind', 'Wind'))
-        self.addNode(PrecipitationNode(self, self.address, 'rain', 'Precipitation'))
-        self.addNode(LightNode(self, self.address, 'light', 'Illumination'))
-        self.addNode(LightningNode(self, self.address, 'lightning', 'Lightning'))
+
+        node = TemperatureNode(self, self.address, 'temperature', 'Temperatures')
+        node.SetUnits(self.units)
+        self.addNode(node)
+
+        node = HumidityNode(self, self.address, 'humidity', 'Humidity')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = WindNode(self, self.address, 'wind', 'Wind')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = PrecipitationNode(self, self.address, 'rain', 'Precipitation')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = LightNode(self, self.address, 'light', 'Illumination')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = LightningNode(self, self.address, 'lightning', 'Lightning')
+        node.SetUnits(self.units)
+        self.addNode(node)
 
         
         if 'customData' in self.polyConfig:
