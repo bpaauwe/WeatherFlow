@@ -56,7 +56,7 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
-- 0.1.6 09/26/2018
+- 0.1.8 09/26/2018
   - Send DON/DOF for heartbeat
   - et initial Controller ST default to 1
   - Set Hub Seconds Since Seen

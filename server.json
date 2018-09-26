@@ -8,7 +8,7 @@
     "notice": "see http://www.weatherflow.com for more information",
     "shortPoll": "5",
     "longPoll": "60",
-    "profile_version": "0.1.6",
+    "profile_version": "0.1.8",
     "credits": [
     	{
     		"title": "WeatherFlow: A node.js library for WeatherFlow",
