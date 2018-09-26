@@ -23,47 +23,54 @@ class Controller(polyinterface.Controller):
         self.primary = self.address
         self.hb = 0
         self.hub_timestamp = 0
+        self.stopping = False
+        self.stopped = True
+        self.myConfig = {}
+        self.rain_data = {
+                'hourly': 0,
+                'hour' : 0,
+                'daily': 0,
+                'day': 0,
+                'weekly': 0,
+                'week': 0,
+                'monthly': 0,
+                'month': 0,
+                'yearly': 0,
+                'year': 0,
+                }
+
         self.poly.onConfig(self.process_config)
+        self.poly.onStop(self.my_stop)
 
     def process_config(self, config):
         # this seems to get called twice for every change, why?
         # What does config represent?
         LOGGER.info("process_config: Enter");
+        if self.myConfig != config['customParams']:
+            if 'Units' in config['customParams']:
+                if self.myConfig['Units'] != config['customParams']['Units']:
 
-        if 'Units' in self.polyConfig['customParams']:
-            self.units = self.polyConfig['customParams']['Units'].lower()
-            for node in self.nodes:
-                if (node != 'hub' and node != 'controller'):
-                    LOGGER.info("Setting node " + node + " to units " + self.units);
-                    self.nodes[node].SetUnits(self.units)
-                    self.addNode(self.nodes[node])
-                else:
-                    LOGGER.info("Skipping node " + node)
-            LOGGER.info("Finished unit configuration.")
+                    self.units = config['customParams']['Units'].lower()
+                    for node in self.nodes:
+                        if (node != 'hub' and node != 'controller'):
+                            LOGGER.info("Setting node " + node + " to units " + self.units);
+                            self.nodes[node].SetUnits(self.units)
+                            self.addNode(self.nodes[node])
+                        else:
+                            LOGGER.info("Skipping node " + node)
+                    LOGGER.info("Finished unit configuration.")
 
-        if 'Elevation' in self.polyConfig['customParams']:
-            self.elevation = self.polyConfig['customParams']['Elevation']
+            if 'Elevation' in config['customParams']:
+                self.elevation = config['customParams']['Elevation']
+
+            self.myConfig = config['customParams']
 
         LOGGER.info("Finished with configuration.")
-
-        #typed_params = config.get('typedCustomData')
-        #for param in typed_params:
-        #    LOGGER.info("param = " + typed_params[param]);
 
     def start(self):
         LOGGER.info('Starting WeatherFlow Node Server')
         self.check_params()
         self.discover()
-
-        # TODO: Is this where we need to set all the node id's and
-        #       update the nodes to use the right nodedefs?
-        LOGGER.info("Start updating nodes with unit information")
-        for node in self.nodes:
-            if (node != 'controller'):
-                LOGGER.info("Setting node " + node + " to units " + self.units);
-                self.nodes[node].SetUnits(self.units)
-
-        LOGGER.info("Finished updating nodes with unit information")
 
         LOGGER.info('starting thread for UDP data')
         threading.Thread(target = self.udp_data).start()
@@ -99,13 +106,54 @@ class Controller(polyinterface.Controller):
                 - Light (UV, solar radiation, lux)
                 - Lightning (strikes, distance)
         """
-        self.addNode(TemperatureNode(self, self.address, 'temperature', 'Temperatures'))
-        self.addNode(HumidityNode(self, self.address, 'humidity', 'Humidity'))
-        self.addNode(PressureNode(self, self.address, 'pressure', 'Barometric Pressure'))
-        self.addNode(WindNode(self, self.address, 'wind', 'Wind'))
-        self.addNode(PrecipitationNode(self, self.address, 'rain', 'Precipitation'))
-        self.addNode(LightNode(self, self.address, 'light', 'Illumination'))
-        self.addNode(LightningNode(self, self.address, 'lightning', 'Lightning'))
+
+        node = TemperatureNode(self, self.address, 'temperature', 'Temperatures')
+        node.SetUnits(self.units)
+        self.addNode(node)
+
+        node = HumidityNode(self, self.address, 'humidity', 'Humidity')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = WindNode(self, self.address, 'wind', 'Wind')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = PrecipitationNode(self, self.address, 'rain', 'Precipitation')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = LightNode(self, self.address, 'light', 'Illumination')
+        node.SetUnits(self.units)
+        self.addNode(node)
+        node = LightningNode(self, self.address, 'lightning', 'Lightning')
+        node.SetUnits(self.units)
+        self.addNode(node)
+
+        
+        if 'customData' in self.polyConfig:
+            try:
+                self.rain_data['hourly'] = self.polyConfig['customData']['hourly']
+                self.rain_data['daily'] = self.polyConfig['customData']['daily']
+                self.rain_data['weekly'] = self.polyConfig['customData']['weekly']
+                self.rain_data['monthly'] = self.polyConfig['customData']['monthly']
+                self.rain_data['yearly'] = self.polyConfig['customData']['yearly']
+                self.rain_data['hour'] = self.polyConfig['customData']['hour']
+                self.rain_data['day'] = self.polyConfig['customData']['day']
+                self.rain_data['month'] = self.polyConfig['customData']['month']
+                self.rain_data['year'] = self.polyConfig['customData']['year']
+            except: 
+                self.rain_data['hourly'] = 0
+                self.rain_data['daily'] = 0
+                self.rain_data['weekly'] = 0
+                self.rain_data['monthly'] = 0
+                self.rain_data['yearly'] = 0
+                self.rain_data['hour'] = datetime.datetime.now().hour
+                self.rain_data['day'] = datetime.datetime.now().day
+                self.rain_data['month'] = datetime.datetime.now().month
+                self.rain_data['year'] = datetime.datetime.now().year
+
+            self.nodes['rain'].InitializeRain(self.rain_data)
 
     def heartbeat(self):
         LOGGER.debug('heartbeat hb={}'.format(self.hb))
@@ -124,6 +172,14 @@ class Controller(polyinterface.Controller):
     def delete(self):
         self.stopping = True
         LOGGER.info('Removing WeatherFlow node server.')
+
+    def my_stop(self):
+        self.stopping = True
+        # Is there something we should do here to really stop?
+        while not self.stopped:
+            self.stopping = True
+
+        LOGGER.info('WeatherFlow node server UDP thread finished.')
 
     def stop(self):
         self.stopping = True
@@ -150,6 +206,8 @@ class Controller(polyinterface.Controller):
             self.elevation = self.polyConfig['customParams']['Elevation']
         else:
             self.elevation = default_elevation
+
+        self.myConfig = self.polyConfig['customParams']
 
         # Make sure they are in the params
         self.addCustomParam({'ListenPort': self.udp_port,
@@ -179,6 +237,7 @@ class Controller(polyinterface.Controller):
 
         LOGGER.info("Starting UDP receive loop")
         while self.stopping == False:
+            self.stopped = False
             hub = s.recvfrom(1024)
             data = json.loads(hub[0].decode("utf-8")) # hub is a truple (json, ip, port)
 
@@ -225,7 +284,7 @@ class Controller(polyinterface.Controller):
                 # process sky data
                 il = data['obs'][0][1]  # Illumination
                 uv = data['obs'][0][2]  # UV Index
-                rr = data['obs'][0][3]  # rain
+                ra = float(data['obs'][0][3])  # rain
                 wl = data['obs'][0][4] * (18 / 5) # wind lull
                 ws = data['obs'][0][5] * (18 / 5) # wind speed
                 wg = data['obs'][0][6] * (18 / 5) # wind gust
@@ -234,7 +293,8 @@ class Controller(polyinterface.Controller):
                 sr = data['obs'][0][10]  # solar radiation
 
                 windspeed = ws
-
+                #ra = .58 # just over half a mm of rain each minute
+                
                 self.nodes['wind'].setDriver('ST', ws)
                 self.nodes['wind'].setDriver('GV0', wd)
                 self.nodes['wind'].setDriver('GV1', wg)
@@ -245,14 +305,28 @@ class Controller(polyinterface.Controller):
                 self.nodes['light'].setDriver('GV0', sr)
                 self.nodes['light'].setDriver('GV1', il)
 
-                rr = (rr * 60) / it
-                self.nodes['rain'].setDriver('ST', rr)
+                rain = self.nodes['rain']
+                rr = (ra * 60) / it
+                rain.setDriver('ST', rr)
 
-                rh = self.nodes['rain'].hourly_accumulation(rr)
-                self.nodes['rain'].setDriver('GV1', rh)
-                rd = self.nodes['rain'].daily_accumulation(rr)
-                self.nodes['rain'].setDriver('GV2', rd)
-                #self.nodes['rain'].setDriver('GV3', 10.2)
+                self.rain_data['hourly'] = rain.hourly_accumulation(ra)
+                self.rain_data['daily'] = rain.daily_accumulation(ra)
+                self.rain_data['weekly'] = rain.weekly_accumulation(ra)
+                self.rain_data['monthly'] = rain.monthly_accumulation(ra)
+                self.rain_data['yearly'] = rain.yearly_accumulation(ra)
+
+                self.rain_data['hour'] = datetime.datetime.now().hour
+                self.rain_data['day'] = datetime.datetime.now().day
+                self.rain_data['month'] = datetime.datetime.now().month
+                self.rain_data['year'] = datetime.datetime.now().year
+
+                rain.setDriver('GV0', self.rain_data['hourly'])
+                rain.setDriver('GV1', self.rain_data['daily'])
+                rain.setDriver('GV2', self.rain_data['weekly'])
+                rain.setDriver('GV3', self.rain_data['monthly'])
+                rain.setDriver('GV4', self.rain_data['yearly'])
+
+                self.poly.saveCustomData(self.rain_data)
 
                 self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
 
@@ -268,6 +342,9 @@ class Controller(polyinterface.Controller):
                 #LOGGER.debug("hub_status: time={} {}".format(time.time(),data))
                 if "timestamp" in data:
                     self.hub_timestamp = data['timestamp']
+
+        s.close()
+        self.stopped = True
 
     def SetUnits(self, u):
         self.units = u
@@ -523,6 +600,21 @@ class PrecipitationNode(polyinterface.Node):
     prev_hour = 0
     prev_day = 0
     prev_week = 0
+    prev_month = 0
+    prev_year = 0
+
+    def InitializeRain(self, acc):
+        self.daily_rain = acc['daily']
+        self.hourly_rain = acc['hourly']
+        self.weekly_rain = acc['weekly']
+        self.monthly_rain = acc['monthly']
+        self.yearly_rain = acc['yearly']
+
+        self.prev_hour = acc['hour']
+        self.prev_day = acc['day']
+        self.prev_week = acc['week']
+        self.prev_month = acc['month']
+        self.prev_year = acc['year']
 
     def SetUnits(self, u):
         self.units = u
@@ -570,14 +662,31 @@ class PrecipitationNode(polyinterface.Node):
         return self.daily_rain
 
     def weekly_accumulation(self, r):
-        current_week = datetime.datetime.now().day
-        if (current_weekday != self.prev_weekday):
-            self.prev_week = current_weekday
-            self.weekly_rain = 0
+        if datetime.datetime.now().weekday == 0:
+            if datetime.datetime.now().hour == 0:
+                if datetime.datetime.now().minute == 0:
+                    self.weekly_rain = 0
 
         self.weekly_rain += r
         return self.weekly_rain
 
+    def monthly_accumulation(self, r):
+        current_month = datetime.datetime.now().month
+        if (current_month != self.prev_month):
+            self.prev_month = current_month
+            self.monthly_rain = 0
+
+        self.monthly_rain += r
+        return self.monthly_rain
+
+    def yearly_accumulation(self, r):
+        current_year = datetime.datetime.now().year
+        if (current_year != self.prev_year):
+            self.prev_year = current_year
+            self.yearly_rain = 0
+
+        self.yearly_rain += r
+        return self.yearly_rain
 
     def setDriver(self, driver, value):
         if (self.units == 'us'):
