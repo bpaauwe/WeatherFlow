@@ -291,7 +291,7 @@ class Controller(polyinterface.Controller):
             {'driver': 'GV1', 'value': 0, 'uom': 72},  # Sky battery level
             {'driver': 'GV2', 'value': 0, 'uom': 25},  # Air RSSI
             {'driver': 'GV3', 'value': 0, 'uom': 25},  # Sky RSSI
-            {'driver': 'GV4', 'value': 0, 'uom': 25}   # Hub seconds since seen
+            {'driver': 'GV4', 'value': 0, 'uom': 57}   # Hub seconds since seen
             ]
 
 
