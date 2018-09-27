@@ -21,6 +21,8 @@ class Controller(polyinterface.Controller):
         self.name = 'WeatherFlow'
         self.address = 'hub'
         self.primary = self.address
+        self.hb = 0
+        self.hub_timestamp = 0
         self.stopping = False
         self.stopped = True
         self.myConfig = {}
@@ -85,10 +87,13 @@ class Controller(polyinterface.Controller):
                 we wanted to use that method to get data. But currently
                 we get data via the local UDP broadcasts.
         """
+        self.heartbeat()
+        self.set_hub_timestamp()
 
     def query(self):
         for node in self.nodes:
             self.nodes[node].reportDrivers()
+        self.set_hub_timestamp()
 
     def discover(self, *args, **kwargs):
         """
@@ -149,6 +154,20 @@ class Controller(polyinterface.Controller):
                 self.rain_data['year'] = datetime.datetime.now().year
 
             self.nodes['rain'].InitializeRain(self.rain_data)
+
+    def heartbeat(self):
+        LOGGER.debug('heartbeat hb={}'.format(self.hb))
+        if self.hb == 0:
+            self.reportCmd("DON",2)
+            self.hb = 1
+        else:
+            self.reportCmd("DOF",2)
+            self.hb = 0
+
+    def set_hub_timestamp(self):
+        s = int(time.time() - self.hub_timestamp)
+        LOGGER.debug("set_hub_timestamp: {}".format(s))
+        self.setDriver('GV4', s)
 
     def delete(self):
         self.stopping = True
@@ -225,7 +244,7 @@ class Controller(polyinterface.Controller):
             """
             Depending on the type of data recieved, process it and
             update the correct node.
-                                indexes are lower case names. I.E. 
+                                indexes are lower case names. I.E.
                                 self.nodes['temperature']
             """
             if (data["type"] == "obs_air"):
@@ -317,7 +336,12 @@ class Controller(polyinterface.Controller):
                 if "SK" in data["serial_number"]:
                     self.setDriver('GV3', data['rssi'], report=True, force=True)
 
-            #if (data["type"] == "hub_status"):
+            if (data["type"] == "hub_status"):
+                # This comes every 10 seconds, but we only update the driver
+                # during longPoll, so just save it.
+                #LOGGER.debug("hub_status: time={} {}".format(time.time(),data))
+                if "timestamp" in data:
+                    self.hub_timestamp = data['timestamp']
 
         s.close()
         self.stopped = True
@@ -339,11 +363,12 @@ class Controller(polyinterface.Controller):
     }
     # Hub status information here: battery and rssi values.
     drivers = [
-            {'driver': 'ST', 'value': 0, 'uom': 2},
+            {'driver': 'ST', 'value': 1, 'uom': 2},
             {'driver': 'GV0', 'value': 0, 'uom': 72},  # Air battery level
             {'driver': 'GV1', 'value': 0, 'uom': 72},  # Sky battery level
             {'driver': 'GV2', 'value': 0, 'uom': 25},  # Air RSSI
-            {'driver': 'GV3', 'value': 0, 'uom': 25}   # Sky RSSI
+            {'driver': 'GV3', 'value': 0, 'uom': 25},  # Sky RSSI
+            {'driver': 'GV4', 'value': 0, 'uom': 57}   # Hub seconds since seen
             ]
 
 
@@ -369,7 +394,7 @@ class TemperatureNode(polyinterface.Node):
             self.drivers[4]['uom'] = 4
             self.id = 'temperature'
         elif (u == 'uk'):  # C
-            self.drivers[0]['uom'] = 4 
+            self.drivers[0]['uom'] = 4
             self.drivers[1]['uom'] = 4
             self.drivers[2]['uom'] = 4
             self.drivers[3]['uom'] = 4
@@ -468,7 +493,7 @@ class PressureNode(polyinterface.Node):
             self.drivers[1]['uom'] = 117
             self.id = 'pressure'
         elif (u == 'uk'):  # millibar
-            self.drivers[0]['uom'] = 117 
+            self.drivers[0]['uom'] = 117
             self.drivers[1]['uom'] = 117
             self.id = 'pressureUK'
         elif (u == 'us'):   # inHg
@@ -537,12 +562,12 @@ class WindNode(polyinterface.Node):
             self.drivers[2]['uom'] = 32
             self.drivers[4]['uom'] = 32
             self.id = 'wind'
-        elif (u == 'uk'): 
+        elif (u == 'uk'):
             self.drivers[0]['uom'] = 48
             self.drivers[2]['uom'] = 48
             self.drivers[4]['uom'] = 48
             self.id = 'windUK'
-        elif (u == 'us'): 
+        elif (u == 'us'):
             self.drivers[0]['uom'] = 48
             self.drivers[2]['uom'] = 48
             self.drivers[4]['uom'] = 48
@@ -601,7 +626,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[4]['uom'] = 82
             self.drivers[5]['uom'] = 82
             self.id = 'precipitation'
-        elif (u == 'uk'): 
+        elif (u == 'uk'):
             self.drivers[0]['uom'] = 46
             self.drivers[1]['uom'] = 82
             self.drivers[2]['uom'] = 82
@@ -609,7 +634,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[4]['uom'] = 82
             self.drivers[5]['uom'] = 82
             self.id = 'precipitationUK'
-        elif (u == 'us'): 
+        elif (u == 'us'):
             self.drivers[0]['uom'] = 24
             self.drivers[1]['uom'] = 105
             self.drivers[2]['uom'] = 105
@@ -663,7 +688,6 @@ class PrecipitationNode(polyinterface.Node):
         self.yearly_rain += r
         return self.yearly_rain
 
-        
     def setDriver(self, driver, value):
         if (self.units == 'us'):
             value = round(value * 0.03937, 2)
@@ -700,11 +724,11 @@ class LightningNode(polyinterface.Node):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 83
             self.id = 'lightning'
-        elif (u == 'uk'): 
+        elif (u == 'uk'):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 116
             self.id = 'lightningUK'
-        elif (u == 'us'): 
+        elif (u == 'us'):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 116
             self.id = 'lightningUS'
