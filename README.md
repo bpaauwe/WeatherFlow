@@ -57,6 +57,7 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 # Release Notes
 
 - 0.1.7 09/26/2018
+   - Make sure the configuration values are set before trying to use them
    - Fix bug in restoring rain accumulation.
    - Changed order of node creation so that nodes get added with the correct units.
 - 0.1.6 09/25/2018

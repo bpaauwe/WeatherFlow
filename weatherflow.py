@@ -177,16 +177,19 @@ class Controller(polyinterface.Controller):
             self.udp_port = int(self.polyConfig['customParams']['ListenPort'])
         else:
             self.udp_port = default_port
+            self.polyConfig['customParams']['ListenPort'] = default_port
 
         if 'Units' in self.polyConfig['customParams']:
             self.units = self.polyConfig['customParams']['Units'].lower()
         else:
             self.units = default_units
+            self.polyConfig['customParams']['Units'] = default_units
 
         if 'Elevation' in self.polyConfig['customParams']:
             self.elevation = self.polyConfig['customParams']['Elevation']
         else:
             self.elevation = default_elevation
+            self.polyConfig['customParams']['Elevation'] = default_elevation
 
         self.myConfig = self.polyConfig['customParams']
 
