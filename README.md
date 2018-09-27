@@ -25,7 +25,7 @@ The settings for this node are:
 #### Short Poll
    * This is how often it will update the last update time for each node.
 #### Long Poll
-   * Not currently used
+   * Sends a heartbeat as DON/DOF
 #### Elevation
    * The height of the Air sensor above sea level, in meters.
 #### Units
@@ -56,6 +56,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.8 09/16/2018
+  - JimBo: Send DON/DOF for heartbeta
 - 0.1.7 09/26/2018
    - Add some error trapping in the config change handler
    - Make sure the configuration values are set before trying to use them

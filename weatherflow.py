@@ -36,6 +36,7 @@ class Controller(polyinterface.Controller):
                 'yearly': 0,
                 'year': 0,
                 }
+        self.hb = 0
 
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
@@ -88,6 +89,7 @@ class Controller(polyinterface.Controller):
                 we wanted to use that method to get data. But currently
                 we get data via the local UDP broadcasts.
         """
+        self.heartbeat()
 
     def query(self):
         for node in self.nodes:
@@ -152,6 +154,15 @@ class Controller(polyinterface.Controller):
                 self.rain_data['year'] = datetime.datetime.now().year
 
             self.nodes['rain'].InitializeRain(self.rain_data)
+
+    def heartbeat(self):
+        LOGGER.debug('heartbeat hb={}'.format(self.hb))
+        if self.hb == 0:
+            self.reportCmd("DON",2)
+            self.hb = 1
+        else:
+            self.reportCmd("DOF",2)
+            self.hb = 0
 
     def delete(self):
         self.stopping = True
