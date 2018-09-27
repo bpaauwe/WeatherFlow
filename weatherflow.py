@@ -46,17 +46,20 @@ class Controller(polyinterface.Controller):
         LOGGER.info("process_config: Enter");
         if self.myConfig != config['customParams']:
             if 'Units' in config['customParams']:
-                if self.myConfig['Units'] != config['customParams']['Units']:
+                try:
+                    if self.myConfig['Units'] != config['customParams']['Units']:
 
-                    self.units = config['customParams']['Units'].lower()
-                    for node in self.nodes:
-                        if (node != 'hub' and node != 'controller'):
-                            LOGGER.info("Setting node " + node + " to units " + self.units);
-                            self.nodes[node].SetUnits(self.units)
-                            self.addNode(self.nodes[node])
-                        else:
-                            LOGGER.info("Skipping node " + node)
-                    LOGGER.info("Finished unit configuration.")
+                        self.units = config['customParams']['Units'].lower()
+                        for node in self.nodes:
+                            if (node != 'hub' and node != 'controller'):
+                                LOGGER.info("Setting node " + node + " to units " + self.units);
+                                self.nodes[node].SetUnits(self.units)
+                                self.addNode(self.nodes[node])
+                            else:
+                                LOGGER.info("Skipping node " + node)
+                        LOGGER.info("Finished unit configuration.")
+                except:
+                    LOGGER.debug('attempt to set units before configured.')
 
             if 'Elevation' in config['customParams']:
                 self.elevation = config['customParams']['Elevation']
