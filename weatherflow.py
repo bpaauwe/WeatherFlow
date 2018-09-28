@@ -75,7 +75,10 @@ class Controller(polyinterface.Controller):
         self.discover()
 
         LOGGER.info('starting thread for UDP data')
-        threading.Thread(target = self.udp_data).start()
+        self.udp = threading.Thread(target = self.udp_data)
+        self.udp.daemon = True
+        self.udp.start()
+
         #for node in self.nodes:
         #       LOGGER.info (self.nodes[node].name + ' is at index ' + node)
         LOGGER.info('WeatherFlow Node Server Started.')
