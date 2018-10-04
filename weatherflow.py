@@ -362,7 +362,7 @@ class Controller(polyinterface.Controller):
     name = 'WeatherFlow'
     address = 'hub'
     stopping = False
-    hint = 0xffffff
+    hint = [1, 11, 0, 0]
     units = 'metric'
     commands = {
         'DISCOVER': discover,
@@ -382,7 +382,7 @@ class Controller(polyinterface.Controller):
 
 class TemperatureNode(polyinterface.Node):
     id = 'temperature'
-    hint = 0xffffff
+    hint = [1,11,1,0]
     units = 'us'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 17},
@@ -469,7 +469,7 @@ class TemperatureNode(polyinterface.Node):
 
 class HumidityNode(polyinterface.Node):
     id = 'humidity'
-    hint = 0xffffff
+    hint = [1,11,2,0]
     units = 'metric'
     drivers = [{'driver': 'ST', 'value': 0, 'uom': 22}]
 
@@ -481,7 +481,7 @@ class HumidityNode(polyinterface.Node):
 
 class PressureNode(polyinterface.Node):
     id = 'pressure'
-    hint = 0xffffff
+    hint = [1,11,3,0]
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 117},  # abs press
@@ -553,7 +553,7 @@ class PressureNode(polyinterface.Node):
 
 class WindNode(polyinterface.Node):
     id = 'wind'
-    hint = 0xffffff
+    hint = [1,11,4,0]
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 32},  # speed
@@ -589,7 +589,7 @@ class WindNode(polyinterface.Node):
 
 class PrecipitationNode(polyinterface.Node):
     id = 'precipitation'
-    hint = 0xffffff
+    hint = [1,11,5,0]
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 46},  # rate
@@ -705,7 +705,7 @@ class PrecipitationNode(polyinterface.Node):
 class LightNode(polyinterface.Node):
     id = 'light'
     units = 'metric'
-    hint = 0xffffff
+    hint = [1,11,6,0]
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 71},  # UV
             {'driver': 'GV0', 'value': 0, 'uom': 74},  # solar radiation
@@ -720,7 +720,7 @@ class LightNode(polyinterface.Node):
 
 class LightningNode(polyinterface.Node):
     id = 'lightning'
-    hint = 0xffffff
+    hint = [1,11,7,0]
     units = 'metric'
     drivers = [
             {'driver': 'ST', 'value': 0, 'uom': 25},  # Strikes
