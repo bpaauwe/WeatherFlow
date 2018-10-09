@@ -42,32 +42,49 @@ class Controller(polyinterface.Controller):
         self.poly.onStop(self.my_stop)
 
     def process_config(self, config):
-        # this seems to get called twice for every change, why?
-        # What does config represent?
-        LOGGER.info("process_config: Enter");
-        if self.myConfig != config['customParams']:
-            if 'Units' in config['customParams']:
-                try:
-                    if self.myConfig['Units'] != config['customParams']['Units']:
+        # This isn't really what the name implies, it is getting called
+        # for all non-driver database updates.  It also appears to be called
+        # after the database update has occured.  Thus it is pretty much
+        # useless for parameter checking.
 
-                        self.units = config['customParams']['Units'].lower()
-                        for node in self.nodes:
-                            if (node != 'hub' and node != 'controller'):
-                                LOGGER.info("Setting node " + node + " to units " + self.units);
-                                self.nodes[node].SetUnits(self.units)
-                                self.addNode(self.nodes[node])
-                            else:
-                                LOGGER.info("Skipping node " + node)
-                        LOGGER.info("Finished unit configuration.")
-                except:
-                    LOGGER.debug('attempt to set units before configured.')
+        # can we just ignore non-parameter changes?
+        if self.myConfig == config['customParams']:
+            return
 
-            if 'Elevation' in config['customParams']:
-                self.elevation = config['customParams']['Elevation']
+        # looks like a parameter changed, so which one?
+        new_params = config['customParams']
 
-            self.myConfig = config['customParams']
+        if new_params['Units'] != self.myConfig['Units']:
+            LOGGER.info('Changed units from %s to %s' %
+                    (self.myConfig['Units'], new_params['Units']))
+            # Ideally, we'd like to validate the entered units and
+            # report some error if they are wrong, but at this point
+            # the database has been updated.
+            # FIXME: can we call something common to set the units?
 
-        LOGGER.info("Finished with configuration.")
+            self.units = config['customParams']['Units'].lower()
+            if self.units != 'metric' and self.units != 'us' and self.units != 'uk':
+                # invalid units
+                self.units = 'metric'
+                config['customParams']['Units'] = self.units
+
+            for node in self.nodes:
+               if (node != 'hub' and node != 'controller'):
+                   LOGGER.info("Setting node " + node + " to units " + self.units);
+                   self.nodes[node].SetUnits(self.units)
+                   self.addNode(self.nodes[node])
+               else:
+                   LOGGER.info("Skipping node " + node)
+
+        if new_params['Elevation'] != self.myConfig['Elevation']:
+            LOGGER.info('Changed elevation from %s to %s' %
+                    (self.myConfig['Elevation'], new_params['Elevation']))
+
+        if new_params['ListenPort'] != self.myConfig['ListenPort']:
+            LOGGER.info('Changed UDP Port from %s to %s' %
+                    (self.myConfig['ListenPort'], new_params['ListenPort']))
+
+        self.myConfig = config['customParams']
 
     def start(self):
         LOGGER.info('Starting WeatherFlow Node Server')
@@ -190,6 +207,19 @@ class Controller(polyinterface.Controller):
         self.stopping = True
         LOGGER.debug('Stopping WeatherFlow node server.')
 
+    def check_units(self):
+        if 'Units' in self.polyConfig['customParams']:
+            units = self.polyConfig['customParams']['Units'].lower()
+
+            if units != 'metric' and units != 'us' and units != 'uk':
+                # invalid units
+                units = 'metric'
+                self.addCustomParam({'Units': units})
+        else:
+            units = 'metric'
+
+        return units
+
     def check_params(self):
         """
         Elevation, UDP port, and Units for now.
@@ -197,17 +227,14 @@ class Controller(polyinterface.Controller):
         default_port = 50222
         default_elevation = 0
         default_units = "metric"
+
+        self.units = self.check_units()
+
         if 'ListenPort' in self.polyConfig['customParams']:
             self.udp_port = int(self.polyConfig['customParams']['ListenPort'])
         else:
             self.udp_port = default_port
             self.polyConfig['customParams']['ListenPort'] = default_port
-
-        if 'Units' in self.polyConfig['customParams']:
-            self.units = self.polyConfig['customParams']['Units'].lower()
-        else:
-            self.units = default_units
-            self.polyConfig['customParams']['Units'] = default_units
 
         if 'Elevation' in self.polyConfig['customParams']:
             self.elevation = self.polyConfig['customParams']['Elevation']
