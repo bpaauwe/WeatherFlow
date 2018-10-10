@@ -13,8 +13,8 @@
     	{
     		"title": "WeatherFlow: A node.js library for WeatherFlow",
     		"author": "Bob Paauwe",
-    		"version": "0.1.9",
-    		"date": "October 4, 2018",
+    		"version": "0.1.10",
+    		"date": "October 9, 2018",
     		"source": "https://github.com/bpaauwe/WeatherFlow",
             "license": "https://github.com/bpaauwe/WeatherFlow/LICENSE"
 		}

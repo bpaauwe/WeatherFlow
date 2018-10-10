@@ -56,6 +56,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.10 10/09/2018
+  - Add error checking to units entry.
+  - Add configuration help text
 - 0.1.9 10/04/2018
   - Set hint correctly
   - Fix bug with UDP thread start. 
