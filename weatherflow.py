@@ -172,8 +172,11 @@ class Controller(polyinterface.Controller):
                 self.rain_data['yearly'] = 0
                 self.rain_data['hour'] = datetime.datetime.now().hour
                 self.rain_data['day'] = datetime.datetime.now().day
+                self.rain_data['week'] = datetime.datetime.now().isocalendar()[1]
                 self.rain_data['month'] = datetime.datetime.now().month
                 self.rain_data['year'] = datetime.datetime.now().year
+                # TODO: Can we query the current accumulation data from
+                # weatherflow servers???
 
             self.nodes['rain'].InitializeRain(self.rain_data)
 
@@ -552,7 +555,7 @@ class PressureNode(polyinterface.Node):
 
     # track pressures in a queue and calculate trend
     def updateTrend(self, current):
-        t = 0
+        t = 1  # Steady
         past = 0
 
         if len(self.mytrend) == 180:
@@ -563,17 +566,18 @@ class PressureNode(polyinterface.Node):
 
         # calculate trend
         if ((past - current) > 1):
-            t = -1
+            t = 0 # Falling
         elif ((past - current) < -1):
-            t = 1
+            t = 2 # Rising
 
         self.mytrend.insert(0, current)
+
         return t
 
     # We want to override the SetDriver method so that we can properly
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
-        if (self.units == 'us'):
+        if (self.units == 'us' and driver != 'GV1' ):
             value = round(value * 0.02952998751, 3)
         super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 
@@ -651,6 +655,48 @@ class PrecipitationNode(polyinterface.Node):
         self.prev_month = acc['month']
         self.prev_year = acc['year']
 
+        now = datetime.datetime.now()
+
+        # Need to compare saved date with current date and clear out 
+        # any accumlations that are old.
+
+        current_hour = now.hour
+        if self.prev_hour != now.hour:
+            LOGGER.info('Clearing old hourly data')
+            self.prev_hour = now.hour
+            self.hourly_rain = 0
+
+        if self.prev_day != now.day:
+            LOGGER.info('Clearing old daily, hourly data')
+            self.prev_day = now.day
+            self.hourly_rain = 0
+            self.daily_rain = 0
+
+        if self.prev_week != now.isocalendar()[1]:
+            LOGGER.info('Clearing old weekly, daily, hourly data')
+            self.prev_week = now.isocalendar()[1]
+            self.hourly_rain = 0
+            self.daily_rain = 0
+            self.weekly_rain = 0
+
+        if self.prev_month != now.month:
+            LOGGER.info('Clearing old monthly, daily, hourly data')
+            self.prev_month = now.month
+            self.hourly_rain = 0
+            self.daily_rain = 0
+            self.weekly_rain = 0
+            self.monthly_rain = 0
+
+        if self.prev_year != now.year:
+            LOGGER.info('Clearing old yearly, monthly, daily, hourly data')
+            self.prev_year = now.year
+            self.hourly_rain = 0
+            self.daily_rain = 0
+            self.weekly_rain = 0
+            self.monthly_rain = 0
+            self.yearly_rain = 0
+
+
     def SetUnits(self, u):
         self.units = u
         if (u == 'metric'):
@@ -682,7 +728,7 @@ class PrecipitationNode(polyinterface.Node):
         current_hour = datetime.datetime.now().hour
         if (current_hour != self.prev_hour):
             self.prev_hour = current_hour
-            self.hourly = 0
+            self.hourly_rain = 0
 
         self.hourly_rain += r
         return self.hourly_rain
@@ -697,10 +743,10 @@ class PrecipitationNode(polyinterface.Node):
         return self.daily_rain
 
     def weekly_accumulation(self, r):
-        if datetime.datetime.now().weekday == 0:
-            if datetime.datetime.now().hour == 0:
-                if datetime.datetime.now().minute == 0:
-                    self.weekly_rain = 0
+        (y, w, d) = datetime.datetime.now().isocalendar()
+        if w != self.prev_week:
+            self.prev_week = w
+            self.weekly_rain = 0
 
         self.weekly_rain += r
         return self.weekly_rain
