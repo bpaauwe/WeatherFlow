@@ -56,6 +56,14 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+
+- 0.1.11 10/15/2018
+  - Change weekly rain accumulation to use week number instead of day of week.
+  - Hourly rain was not reseting at begining of next hour
+  - Clear old rain accumulations on restart
+  - Fix pressure trend values, the values didn't match the NLS names.
+  - Don't convert pressure trend when US units are selected, trying to do
+    a mb -> inHg conversion on the trend value doesn't make sense.
 - 0.1.10 10/09/2018
   - Add error checking to units entry.
   - Add configuration help text
