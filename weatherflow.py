@@ -449,6 +449,10 @@ class TemperatureNode(polyinterface.Node):
     def Dewpoint(self, t, h):
         b = (17.625 * t) / (243.04 + t)
         rh = h / 100.0
+
+        if rh <= 0:
+            return 0
+
         c = math.log(rh)
         dewpt = (243.04 * (c + b)) / (17.625 - c - b)
         return round(dewpt, 1)
