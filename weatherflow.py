@@ -545,15 +545,17 @@ class PressureNode(polyinterface.Node):
 
     # convert station pressure in millibars to sealevel pressure
     def toSeaLevel(self, station, elevation):
-        i = 287.05
-        a = 9.80665
-        r = 0.0065
+        i = 287.05  # gas constant for dry air
+        a = 9.80665 # gravity
+        r = 0.0065  # standard atmosphere lapse rate
         s = 1013.35 # pressure at sealevel
-        n = 288.15
+        n = 288.15  # sea level temperature
 
         l = a / (i * r)
+
         c = i * r / a
-        u = math.pow(1 + math.pow(s / station, c) * (r * elevation / n), 1)
+
+        u = math.pow(1 + math.pow(s / station, c) * (r * elevation / n), l)
 
         return (round((station * u), 3))
 
