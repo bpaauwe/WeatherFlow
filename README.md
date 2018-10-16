@@ -56,7 +56,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
-
+- 0.1.12 10/16/2018
+  - Fix typo in sea level pressure calculation
+  - Add error checking to dewpoint calculation
 - 0.1.11 10/15/2018
   - Change weekly rain accumulation to use week number instead of day of week.
   - Hourly rain was not reseting at begining of next hour
