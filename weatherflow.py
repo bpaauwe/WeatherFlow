@@ -294,7 +294,7 @@ class Controller(polyinterface.Controller):
                 ls = data['obs'][0][4] # strikes
                 ld = data['obs'][0][5] # distance
 
-                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation)
+                sl = self.nodes['pressure'].toSeaLevel(p, int(self.elevation))
                 self.nodes['pressure'].setDriver('ST', sl)
                 self.nodes['pressure'].setDriver('GV0', p)
                 trend = self.nodes['pressure'].updateTrend(p)
