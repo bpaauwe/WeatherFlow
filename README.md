@@ -56,6 +56,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.13 10/17/2018
+  - Use entered elevation for sealevel pressure calulation
 - 0.1.12 10/16/2018
   - Fix typo in sea level pressure calculation
   - Add error checking to dewpoint calculation
