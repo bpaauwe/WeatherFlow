@@ -40,6 +40,9 @@ class Controller(polyinterface.Controller):
         self.hub_timestamp = 0
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
+        self.station = ''
+        self.agl = 0.0
+        self.elevation = 0.0
 
     def process_config(self, config):
         # This isn't really what the name implies, it is getting called
@@ -86,6 +89,92 @@ class Controller(polyinterface.Controller):
 
         self.myConfig = config['customParams']
 
+    def query_wf(self):
+        """
+        We need to call this after we get the customParams because
+        we need the station number. However, we may want some of the
+        data here to override user entered data.  Specifically, elevation
+        and units.
+        """
+        if self.station == "":
+            LOGGER.info('no station defined, skipping lookup.')
+            return
+
+        LOGGER.info('Creating URL')
+        path_str = '/swd/rest/stations/'
+        path_str += self.station
+        path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
+        LOGGER.info('url = %s' % path_str)
+
+        try:
+            #http = urllib3.PoolManager()
+            http = urllib3.HTTPConnectionPool('swd.weatherflow.com', maxsize=1)
+
+            # Get station meta data
+            c = http.request('GET', path_str)
+            LOGGER.info('Made request')
+            LOGGER.info('%s %s' % (c.status, c.reason))
+            #LOGGER.info('data = %s' % c.data)
+            awdata = json.loads(c.data.decode('utf-8'))
+            #LOGGER.info(awdata['stations'][0]['devices'])
+            LOGGER.info('elevation = %f' % awdata['stations'][0]['station_meta']['elevation'])
+            for device in awdata['stations'][0]['devices']:
+                LOGGER.info('%s %s agl = %s' % (device['device_id'], device['device_type'], device['device_meta']['agl']))
+                if device['device_type'] == 'AR':
+                    self.agl = float(device['device_meta']['agl'])
+            c.close()
+
+            # Get station observations
+            path_str = '/swd/rest/observations/station/'
+            path_str += self.station
+            path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
+            c = http.request('GET', path_str)
+            LOGGER.info('%s %s' % (c.status, c.reason))
+
+            #LOGGER.info('data = %s' % c.data)
+            awdata = json.loads(c.data.decode('utf-8'))
+
+            # TODO: check user preference for units and set accordingly
+            LOGGER.info('Units = %s' % awdata['station_units'])
+            # Check distance & temp
+            # if dist in miles & temp in F == US
+            # if dist in miles & temp in C == UK
+            # else == metric
+            temp_unit = awdata['station_units']['units_temp']
+            dist_unit = awdata['station_units']['units_distance']
+
+            if temp_unit == 'f' and dist_unit == 'mi':
+                LOGGER.info('WF says units are US')
+                self.units = 'us'
+            elif temp_unit == 'c' and dist_unit == 'mi':
+                LOGGER.info('WF says units are UK')
+                self.units = 'uk'
+            else:
+                LOGGER.info('WF says units are metric')
+                self.units = 'metric'
+
+            # Override entered elevation with info from station
+            # TODO: Only override if current value is 0?
+            #       if we do override, should this save to customParams too?
+            LOGGER.info('Elevation = %f' % awdata['elevation'])
+            self.elevation = float(awdata['elevation'])
+
+            # We need to query device information to get the height above
+            # ground for the air sensor. Do we have the info to get that?
+
+
+            # obs is array of dictionaries. Array index 0 is what we want
+            # to get current daily and yesterday daily rainfall values
+            LOGGER.info('keys = %s' % awdata['obs'])
+
+            LOGGER.info('daily = %f' % awdata['obs'][0]['precip_accum_local_day'])
+            LOGGER.info('yesterday = %f' % awdata['obs'][0]['precip_accum_local_yesterday'])
+        except Exception as e:
+            LOGGER.error('Bad: %s' % str(e))
+
+        c.close()
+        http.close()
+
     def start(self):
         LOGGER.info('Starting WeatherFlow Node Server')
         self.check_params()
@@ -128,6 +217,8 @@ class Controller(polyinterface.Controller):
                 - Light (UV, solar radiation, lux)
                 - Lightning (strikes, distance)
         """
+
+        self.query_wf()
 
         node = TemperatureNode(self, self.address, 'temperature', 'Temperatures')
         node.SetUnits(self.units)
@@ -180,6 +271,10 @@ class Controller(polyinterface.Controller):
 
             self.nodes['rain'].InitializeRain(self.rain_data)
 
+            # Might be able to get some information from API using station
+            # number:
+            # swd.weatherflow.com/swd/rest/observations/station/<num>?apikey=
+
     def heartbeat(self):
         LOGGER.debug('heartbeat hb={}'.format(self.hb))
         if self.hb == 0:
@@ -228,7 +323,7 @@ class Controller(polyinterface.Controller):
         Elevation, UDP port, and Units for now.
         """
         default_port = 50222
-        default_elevation = 0
+        default_elevation = 0.0
         default_units = "metric"
 
         self.units = self.check_units()
@@ -239,8 +334,14 @@ class Controller(polyinterface.Controller):
             self.udp_port = default_port
             self.polyConfig['customParams']['ListenPort'] = default_port
 
+        if 'Station' in self.polyConfig['customParams']:
+            self.station = self.polyConfig['customParams']['Station']
+
+        if 'AGL' in self.polyConfig['customParams']:
+            self.agl = float(self.polyConfig['customParams']['AGL'])
+
         if 'Elevation' in self.polyConfig['customParams']:
-            self.elevation = self.polyConfig['customParams']['Elevation']
+            self.elevation = float(self.polyConfig['customParams']['Elevation'])
         else:
             self.elevation = default_elevation
             self.polyConfig['customParams']['Elevation'] = default_elevation
@@ -294,7 +395,7 @@ class Controller(polyinterface.Controller):
                 ls = data['obs'][0][4] # strikes
                 ld = data['obs'][0][5] # distance
 
-                sl = self.nodes['pressure'].toSeaLevel(p, int(self.elevation))
+                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
                 self.nodes['pressure'].setDriver('ST', sl)
                 self.nodes['pressure'].setDriver('GV0', p)
                 trend = self.nodes['pressure'].updateTrend(p)
