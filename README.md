@@ -56,6 +56,11 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.14 10/18/2018
+  - Add station id configuration option
+  - Using station id, query WF servers for station elevation, Air height
+    above ground, and user's unit preferences.
+  - Add configuration option for Air sensor height above ground
 - 0.1.13 10/17/2018
   - Use entered elevation for sealevel pressure calulation
 - 0.1.12 10/16/2018

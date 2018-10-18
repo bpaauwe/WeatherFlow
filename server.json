@@ -11,10 +11,10 @@
     "profile_version": "0.1.8",
     "credits": [
     	{
-    		"title": "WeatherFlow: A node.js library for WeatherFlow",
+    		"title": "WeatherFlow: A node server for WeatherFlow",
     		"author": "Bob Paauwe",
-    		"version": "0.1.13",
-    		"date": "October 17, 2018",
+    		"version": "0.1.14",
+    		"date": "October 18, 2018",
     		"source": "https://github.com/bpaauwe/WeatherFlow",
             "license": "https://github.com/bpaauwe/WeatherFlow/LICENSE"
 		}
