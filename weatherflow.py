@@ -666,17 +666,27 @@ class PressureNode(polyinterface.Node):
         past = 0
 
         if len(self.mytrend) == 180:
+            # This should be poping the last entry on the list (or the 
+            # oldest item added to the list).
             past = self.mytrend.pop()
 
         if self.mytrend != []:
-            past = self.mytrend[0]
+            # mytrend[0] seems to be the last entry inserted, not
+            # the first.  So how do we get the last item from the
+            # end of the array -- mytrend[-1]
+            past = self.mytrend[-1]
+            for i, p in enumerate(self.mytrend):
+                LOGGER.info('%d = %f' % (i, p))
 
         # calculate trend
+        LOGGER.info('TREND %f to %f' % (past, current))
         if ((past - current) > 1):
             t = 0 # Falling
         elif ((past - current) < -1):
             t = 2 # Rising
 
+        # inserts the value at index 0 and bumps all existing entries
+        # up by one index
         self.mytrend.insert(0, current)
 
         return t
