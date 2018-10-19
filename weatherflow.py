@@ -396,8 +396,8 @@ class Controller(polyinterface.Controller):
                 ld = data['obs'][0][5] # distance
 
                 sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
-                self.nodes['pressure'].setDriver('ST', sl)
-                self.nodes['pressure'].setDriver('GV0', p)
+                self.nodes['pressure'].setDriver('ST', p)
+                self.nodes['pressure'].setDriver('GV0', sl)
                 trend = self.nodes['pressure'].updateTrend(p)
                 self.nodes['pressure'].setDriver('GV1', trend)
 
@@ -619,8 +619,8 @@ class PressureNode(polyinterface.Node):
     hint = [1,11,3,0]
     units = 'metric'
     drivers = [
-            {'driver': 'ST', 'value': 0, 'uom': 117},  # abs press
-            {'driver': 'GV0', 'value': 0, 'uom': 117}, # rel press
+            {'driver': 'ST', 'value': 0, 'uom': 117},  # abs (station) press
+            {'driver': 'GV0', 'value': 0, 'uom': 117}, # rel (sealevel) press
             {'driver': 'GV1', 'value': 0, 'uom': 25}  # trend
             ]
     mytrend = []
