@@ -56,6 +56,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.15 10/19/2018
+  - Fix pressure trend (at least during initial 3 hour window)
+  - Reverse relative and absolut pressure values, the were mixed up.
 - 0.1.14 10/18/2018
   - Add station id configuration option
   - Using station id, query WF servers for station elevation, Air height
