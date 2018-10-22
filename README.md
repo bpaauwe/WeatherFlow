@@ -56,6 +56,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.16 10/22/2018
+  - Clean up debugging log output
+  - Add specific debug output of all raw rain values
 - 0.1.15 10/19/2018
   - Fix pressure trend (at least during initial 3 hour window)
   - Reverse relative and absolut pressure values, the were mixed up.
