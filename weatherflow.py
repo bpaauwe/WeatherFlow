@@ -100,42 +100,30 @@ class Controller(polyinterface.Controller):
             LOGGER.info('no station defined, skipping lookup.')
             return
 
-        LOGGER.info('Creating URL')
         path_str = '/swd/rest/stations/'
         path_str += self.station
         path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
-        LOGGER.info('url = %s' % path_str)
 
         try:
-            #http = urllib3.PoolManager()
             http = urllib3.HTTPConnectionPool('swd.weatherflow.com', maxsize=1)
 
-            # Get station meta data
+            # Get station meta data. We really want AIR height above ground
             c = http.request('GET', path_str)
-            LOGGER.info('Made request')
-            LOGGER.info('%s %s' % (c.status, c.reason))
-            #LOGGER.info('data = %s' % c.data)
             awdata = json.loads(c.data.decode('utf-8'))
-            #LOGGER.info(awdata['stations'][0]['devices'])
-            LOGGER.info('elevation = %f' % awdata['stations'][0]['station_meta']['elevation'])
             for device in awdata['stations'][0]['devices']:
-                LOGGER.info('%s %s agl = %s' % (device['device_id'], device['device_type'], device['device_meta']['agl']))
                 if device['device_type'] == 'AR':
                     self.agl = float(device['device_meta']['agl'])
             c.close()
 
-            # Get station observations
+            # Get station observations. Pull Elevation and user unit prefs.
             path_str = '/swd/rest/observations/station/'
             path_str += self.station
             path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
             c = http.request('GET', path_str)
-            LOGGER.info('%s %s' % (c.status, c.reason))
 
-            #LOGGER.info('data = %s' % c.data)
             awdata = json.loads(c.data.decode('utf-8'))
 
             # TODO: check user preference for units and set accordingly
-            LOGGER.info('Units = %s' % awdata['station_units'])
             # Check distance & temp
             # if dist in miles & temp in F == US
             # if dist in miles & temp in C == UK
@@ -156,24 +144,21 @@ class Controller(polyinterface.Controller):
             # Override entered elevation with info from station
             # TODO: Only override if current value is 0?
             #       if we do override, should this save to customParams too?
-            LOGGER.info('Elevation = %f' % awdata['elevation'])
             self.elevation = float(awdata['elevation'])
-
-            # We need to query device information to get the height above
-            # ground for the air sensor. Do we have the info to get that?
-
 
             # obs is array of dictionaries. Array index 0 is what we want
             # to get current daily and yesterday daily rainfall values
-            LOGGER.info('keys = %s' % awdata['obs'])
 
-            LOGGER.info('daily = %f' % awdata['obs'][0]['precip_accum_local_day'])
-            LOGGER.info('yesterday = %f' % awdata['obs'][0]['precip_accum_local_yesterday'])
+            LOGGER.info('daily rainfall = %f' %
+                    awdata['obs'][0]['precip_accum_local_day'])
+            LOGGER.info('yesterday rainfall = %f' %
+                    awdata['obs'][0]['precip_accum_local_yesterday'])
+            c.close()
+
+            http.close()
         except Exception as e:
             LOGGER.error('Bad: %s' % str(e))
 
-        c.close()
-        http.close()
 
     def start(self):
         LOGGER.info('Starting WeatherFlow Node Server')
@@ -453,6 +438,10 @@ class Controller(polyinterface.Controller):
                 self.rain_data['weekly'] = rain.weekly_accumulation(ra)
                 self.rain_data['monthly'] = rain.monthly_accumulation(ra)
                 self.rain_data['yearly'] = rain.yearly_accumulation(ra)
+                LOGGER.debug('RAIN %f %f %f %f %f %f %f' %
+                        (ra, rr, self.rain_data['hourly'],
+                        self.rain_data['daily'], self.rain_data['weekly'],
+                        self.rain_data['monthly'], self.rain_data['yearly']))
 
                 self.rain_data['hour'] = datetime.datetime.now().hour
                 self.rain_data['day'] = datetime.datetime.now().day
@@ -665,6 +654,8 @@ class PressureNode(polyinterface.Node):
         t = 1  # Steady
         past = 0
 
+        if len(self.mytrend) > 1:
+            LOGGER.info('LAST entry = %f' % self.mytrend[-1])
         if len(self.mytrend) == 180:
             # This should be poping the last entry on the list (or the 
             # oldest item added to the list).
@@ -675,8 +666,6 @@ class PressureNode(polyinterface.Node):
             # the first.  So how do we get the last item from the
             # end of the array -- mytrend[-1]
             past = self.mytrend[-1]
-            for i, p in enumerate(self.mytrend):
-                LOGGER.info('%d = %f' % (i, p))
 
         # calculate trend
         LOGGER.info('TREND %f to %f' % (past, current))
