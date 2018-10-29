@@ -361,6 +361,8 @@ class Controller(polyinterface.Controller):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(('0.0.0.0', self.udp_port))
         windspeed = 0
+        sky_tm = 0
+        air_tm = 0
 
         LOGGER.info("Starting UDP receive loop")
         while self.stopping == False:
@@ -376,13 +378,18 @@ class Controller(polyinterface.Controller):
             """
             if (data["type"] == "obs_air"):
                 # process air data
-                t = data['obs'][0][0] # ts
-                p = data['obs'][0][1] # pressure
-                t = data['obs'][0][2] # temp
-                h = data['obs'][0][3] # humidity
+                tm = data['obs'][0][0] # ts
+                p = data['obs'][0][1]  # pressure
+                t = data['obs'][0][2]  # temp
+                h = data['obs'][0][3]  # humidity
                 ls = data['obs'][0][4] # strikes
                 ld = data['obs'][0][5] # distance
 
+                if air_tm == tm:
+                    LOGGER.debug('Duplicate AIR observations, ignorning')
+                    continue
+
+                air_tm = tm
                 sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
                 self.nodes['pressure'].setDriver('ST', p)
                 self.nodes['pressure'].setDriver('GV0', sl)
@@ -409,6 +416,7 @@ class Controller(polyinterface.Controller):
 
             if (data["type"] == "obs_sky"):
                 # process sky data
+                tm = data['obs'][0][0]  # epoch
                 il = data['obs'][0][1]  # Illumination
                 uv = data['obs'][0][2]  # UV Index
                 ra = float(data['obs'][0][3])  # rain
@@ -419,6 +427,11 @@ class Controller(polyinterface.Controller):
                 it = data['obs'][0][9]  # reporting interval
                 sr = data['obs'][0][10]  # solar radiation
 
+                if sky_tm == tm:
+                    LOGGER.debug('Duplicate SKY observations, ignorning')
+                    continue
+
+                sky_tm = tm
                 windspeed = ws
                 #ra = .58 # just over half a mm of rain each minute
                 
