@@ -35,6 +35,7 @@ class Controller(polyinterface.Controller):
                 'month': 0,
                 'yearly': 0,
                 'year': 0,
+                'yesterday': 0,
                 }
         self.hb = 0
         self.hub_timestamp = 0
@@ -240,12 +241,14 @@ class Controller(polyinterface.Controller):
                 self.rain_data['day'] = self.polyConfig['customData']['day']
                 self.rain_data['month'] = self.polyConfig['customData']['month']
                 self.rain_data['year'] = self.polyConfig['customData']['year']
+                self.rain_data['yesterday'] = self.polyConfig['customData']['yesterday']
             except: 
                 self.rain_data['hourly'] = 0
                 self.rain_data['daily'] = 0
                 self.rain_data['weekly'] = 0
                 self.rain_data['monthly'] = 0
                 self.rain_data['yearly'] = 0
+                self.rain_data['yesterday'] = 0
                 self.rain_data['hour'] = datetime.datetime.now().hour
                 self.rain_data['day'] = datetime.datetime.now().day
                 self.rain_data['week'] = datetime.datetime.now().isocalendar()[1]
@@ -435,6 +438,7 @@ class Controller(polyinterface.Controller):
 
                 self.rain_data['hourly'] = rain.hourly_accumulation(ra)
                 self.rain_data['daily'] = rain.daily_accumulation(ra)
+                self.rain_data['yesterday'] = rain.yesterday_accumulation()
                 self.rain_data['weekly'] = rain.weekly_accumulation(ra)
                 self.rain_data['monthly'] = rain.monthly_accumulation(ra)
                 self.rain_data['yearly'] = rain.yearly_accumulation(ra)
@@ -453,6 +457,7 @@ class Controller(polyinterface.Controller):
                 rain.setDriver('GV2', self.rain_data['weekly'])
                 rain.setDriver('GV3', self.rain_data['monthly'])
                 rain.setDriver('GV4', self.rain_data['yearly'])
+                rain.setDriver('GV5', self.rain_data['yesterday'])
 
                 self.poly.saveCustomData(self.rain_data)
 
@@ -734,13 +739,15 @@ class PrecipitationNode(polyinterface.Node):
             {'driver': 'GV1', 'value': 0, 'uom': 82}, # daily
             {'driver': 'GV2', 'value': 0, 'uom': 82}, # weekly
             {'driver': 'GV3', 'value': 0, 'uom': 82}, # monthly
-            {'driver': 'GV4', 'value': 0, 'uom': 82}  # yearly
+            {'driver': 'GV4', 'value': 0, 'uom': 82}, # yearly
+            {'driver': 'GV5', 'value': 0, 'uom': 82}  # yesterday
             ]
     hourly_rain = 0
     daily_rain = 0
     weekly_rain = 0
     monthly_rain = 0
     yearly_rain = 0
+    yesterday_rain = 0
 
     prev_hour = 0
     prev_day = 0
@@ -754,6 +761,7 @@ class PrecipitationNode(polyinterface.Node):
         self.weekly_rain = acc['weekly']
         self.monthly_rain = acc['monthly']
         self.yearly_rain = acc['yearly']
+        self.yesterday_rain = acc['yesterday']
 
         self.prev_hour = acc['hour']
         self.prev_day = acc['day']
@@ -774,6 +782,7 @@ class PrecipitationNode(polyinterface.Node):
 
         if self.prev_day != now.day:
             LOGGER.info('Clearing old daily, hourly data')
+            self.yesterday_rain = self.daily_rain
             self.prev_day = now.day
             self.hourly_rain = 0
             self.daily_rain = 0
@@ -812,6 +821,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[3]['uom'] = 82
             self.drivers[4]['uom'] = 82
             self.drivers[5]['uom'] = 82
+            self.drivers[6]['uom'] = 82
             self.id = 'precipitation'
         elif (u == 'uk'): 
             self.drivers[0]['uom'] = 46
@@ -820,6 +830,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[3]['uom'] = 82
             self.drivers[4]['uom'] = 82
             self.drivers[5]['uom'] = 82
+            self.drivers[6]['uom'] = 82
             self.id = 'precipitationUK'
         elif (u == 'us'): 
             self.drivers[0]['uom'] = 24
@@ -828,6 +839,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[3]['uom'] = 105
             self.drivers[4]['uom'] = 105
             self.drivers[5]['uom'] = 105
+            self.drivers[6]['uom'] = 105
             self.id = 'precipitationUS'
 
     def hourly_accumulation(self, r):
@@ -842,11 +854,15 @@ class PrecipitationNode(polyinterface.Node):
     def daily_accumulation(self, r):
         current_day = datetime.datetime.now().day
         if (current_day != self.prev_day):
+            self.yesterday_rain = self.daily_rain
             self.prev_day = current_day
             self.daily_rain = 0
 
         self.daily_rain += r
         return self.daily_rain
+
+    def yesterday_accumulation(self):
+        return self.yesterday_rain
 
     def weekly_accumulation(self, r):
         (y, w, d) = datetime.datetime.now().isocalendar()
