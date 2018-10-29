@@ -62,6 +62,7 @@ ST-139R-GV1-NAME = Daily Rainfall
 ST-139R-GV2-NAME = Weekly Rainfall
 ST-139R-GV3-NAME = Monthly Rainfall
 ST-139R-GV4-NAME = Yearly Rainfall
+ST-139R-GV5-NAME = Yesterday Rainfall
 
 ND-light-NAME = Light
 ND-light-ICON = Input

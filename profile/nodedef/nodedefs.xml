@@ -128,6 +128,7 @@
             <st id="GV2" editor="I_MM" />
             <st id="GV3" editor="I_MM" />
             <st id="GV4" editor="I_MM" />
+            <st id="GV5" editor="I_MM" />
         </sts>
     </nodeDef>
     <nodeDef id="precipitationUK" nodeType="139" nls="139R">
@@ -139,6 +140,7 @@
             <st id="GV2" editor="I_MM" />
             <st id="GV3" editor="I_MM" />
             <st id="GV4" editor="I_MM" />
+            <st id="GV5" editor="I_MM" />
         </sts>
     </nodeDef>
     <nodeDef id="precipitationUS" nodeType="139" nls="139R">
@@ -150,6 +152,7 @@
             <st id="GV2" editor="I_INCHES" />
             <st id="GV3" editor="I_INCHES" />
             <st id="GV4" editor="I_INCHES" />
+            <st id="GV5" editor="I_INCHES" />
         </sts>
     </nodeDef>
 
