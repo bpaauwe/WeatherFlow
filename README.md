@@ -56,6 +56,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.17 10/29/2018
+  - Add rain yesterday to rain node.
+  - Ignore duplicate UDP packets.
 - 0.1.16 10/22/2018
   - Clean up debugging log output
   - Add specific debug output of all raw rain values
