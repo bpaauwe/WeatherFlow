@@ -4,7 +4,7 @@
     "type": "python3",
     "executable": "weatherflow.py",
     "install": "install.sh",
-    "description": "Add WeatherFlow weather data to the ISY994",
+    "description": "Access weather data directly from WeatherFlow hub via local network",
     "notice": "see http://www.weatherflow.com for more information",
     "shortPoll": "5",
     "longPoll": "60",
