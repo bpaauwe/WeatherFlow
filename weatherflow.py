@@ -111,9 +111,16 @@ class Controller(polyinterface.Controller):
             # Get station meta data. We really want AIR height above ground
             c = http.request('GET', path_str)
             awdata = json.loads(c.data.decode('utf-8'))
+            LOGGER.info('station devices:')
+            self.station_type = 'SMART'
             for device in awdata['stations'][0]['devices']:
+                LOGGER.info('  - ' + device['device_type'])
+                # Determine if this is an Air/Sky or Tempest
                 if device['device_type'] == 'AR':
                     self.agl = float(device['device_meta']['agl'])
+                elif device['device_type'] == 'ST':
+                    self.agl = float(device['device_meta']['agl'])
+                    self.station_type = 'TEMPEST'
             c.close()
 
             # Get station observations. Pull Elevation and user unit prefs.
@@ -363,6 +370,7 @@ class Controller(polyinterface.Controller):
         windspeed = 0
         sky_tm = 0
         air_tm = 0
+        st_tm  = 0
 
         LOGGER.info("Starting UDP receive loop")
         while self.stopping == False:
@@ -375,6 +383,9 @@ class Controller(polyinterface.Controller):
             update the correct node.
                                 indexes are lower case names. I.E. 
                                 self.nodes['temperature']
+
+            This is going to need changing to handle Tempest device
+            as all data comes in one array.
             """
             if (data["type"] == "obs_air"):
                 # process air data
@@ -391,28 +402,63 @@ class Controller(polyinterface.Controller):
 
                 air_tm = tm
                 sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
-                self.nodes['pressure'].setDriver('ST', p)
-                self.nodes['pressure'].setDriver('GV0', sl)
                 trend = self.nodes['pressure'].updateTrend(p)
-                self.nodes['pressure'].setDriver('GV1', trend)
-
-                self.nodes['temperature'].setDriver('ST', t)
+                self.nodes['pressure'].update(p, sl, trend)
                 fl = self.nodes['temperature'].ApparentTemp(t, windspeed, h)
-                self.nodes['temperature'].setDriver('GV0', fl)
                 dp = self.nodes['temperature'].Dewpoint(t, h)
-                self.nodes['temperature'].setDriver('GV1', dp)
                 hi = self.nodes['temperature'].Heatindex(t, h)
-                self.nodes['temperature'].setDriver('GV2', hi)
                 wc = self.nodes['temperature'].Windchill(t, windspeed)
-                self.nodes['temperature'].setDriver('GV3', wc)
 
-                self.nodes['humidity'].setDriver('ST', h)
+                self.nodes['temperature'].update(t, fl, dp, hi, wc)
+                self.nodes['humidity'].update(h)
 
-                self.nodes['lightning'].setDriver('ST', ls)
-                self.nodes['lightning'].setDriver('GV0', ld)
+                self.nodes['lightning'].update(ls, ld)
 
+                # battery voltage
                 self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
 
+
+            if (data["type"] == "obs_st"):
+                tm = data['obs'][0][0]  # ts
+                wl = data['obs'][0][1] * (18 / 5) # wind lull
+                ws = data['obs'][0][2] * (18 / 5) # wind speed
+                wg = data['obs'][0][3] * (18 / 5) # wind gust
+                wd = data['obs'][0][4]  # wind direction
+                p = data['obs'][0][6]   # pressure
+                t = data['obs'][0][7]   # temp
+                h = data['obs'][0][8]   # humidity
+                il = data['obs'][0][9]  # Illumination
+                uv = data['obs'][0][10] # UV Index
+                sr = data['obs'][0][11] # solar radiation
+                ra = float(data['obs'][0][12])  # rain
+                ls = data['obs'][0][14] # strikes
+                ld = data['obs'][0][15] # distance
+                it = data['obs'][0][17] # reporting interval
+
+                if st_tm == tm:
+                    LOGGER.debug('Duplicate Tempest observations, ignorning')
+                    continue
+
+                stair_tm = tm
+
+                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
+                trend = self.nodes['pressure'].updateTrend(p)
+                fl = self.nodes['temperature'].ApparentTemp(t, ws, h)
+                dp = self.nodes['temperature'].Dewpoint(t, h)
+                hi = self.nodes['temperature'].Heatindex(t, h)
+                wc = self.nodes['temperature'].Windchill(t, ws)
+
+                self.nodes['pressure'].update(p, sl, trend)
+                self.nodes['temperature'].update(t, fl, dp, hi, wc)
+                self.nodes['humidity'].update(h)
+                self.nodes['lightning'].update(ls, ld)
+                self.nodes['wind'].update(ws, wd, wg, wl)
+                self.nodes['light'].update(uv, sr, il)
+
+                #TODO: add rain
+
+                # battery voltage
+                self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
 
             if (data["type"] == "obs_sky"):
                 # process sky data
@@ -607,6 +653,13 @@ class TemperatureNode(polyinterface.Node):
 
         super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True, force=True)
 
+    # Possible TODO: do calculations here. I.E. pass in temp, ws, humidity
+    def update(self, t, fl, dp, hi, wc):
+        self.setDriver('ST', t)
+        self.setDriver('GV0', fl)
+        self.setDriver('GV1', dp)
+        self.setDriver('GV2', hi)
+        self.setDriver('GV3', wc)
 
 
 class HumidityNode(polyinterface.Node):
@@ -620,6 +673,9 @@ class HumidityNode(polyinterface.Node):
 
     def setDriver(self, driver, value):
         super(HumidityNode, self).setDriver(driver, value, report=True, force=True)
+
+    def update(self, h):
+        self.setDriver('ST', h)
 
 class PressureNode(polyinterface.Node):
     id = 'pressure'
@@ -705,6 +761,11 @@ class PressureNode(polyinterface.Node):
             value = round(value * 0.02952998751, 3)
         super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 
+    def update(self, p, sl, trend):
+        self.setDriver('ST', p)
+        self.setDriver('GV0', sl)
+        self.setDriver('GV1', trend)
+
 
 class WindNode(polyinterface.Node):
     id = 'wind'
@@ -741,6 +802,13 @@ class WindNode(polyinterface.Node):
             if (self.units != 'metric'):
                 value = round(value / 1.609344, 2)
         super(WindNode, self).setDriver(driver, value, report=True, force=True)
+
+    def update(self, ws, wd, wg, wl):
+        self.setDriver('ST', ws)
+        self.setDriver('GV0', wd)
+        self.setDriver('GV1', wg)
+        self.setDriver('GV2', wd)
+        self.setDriver('GV3', wl)
 
 class PrecipitationNode(polyinterface.Node):
     id = 'precipitation'
@@ -926,6 +994,11 @@ class LightNode(polyinterface.Node):
     def setDriver(self, driver, value):
         super(LightNode, self).setDriver(driver, value, report=True, force=True)
 
+    def update(self, uv, sr, il):
+        selfSetDriver('ST', uv)
+        selfSetDriver('GV0', sr)
+        selfSetDriver('GV1', il)
+
 class LightningNode(polyinterface.Node):
     id = 'lightning'
     hint = [1,11,7,0]
@@ -956,6 +1029,9 @@ class LightningNode(polyinterface.Node):
                 value = round(value / 1.609344, 1)
         super(LightningNode, self).setDriver(driver, value, report=True, force=True)
 
+    def update(self, ls, ld):
+        self.setDriver('ST', ls)
+        self.setDriver('GV0', ld)
 
 if __name__ == "__main__":
     try:
