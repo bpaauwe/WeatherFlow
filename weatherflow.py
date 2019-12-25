@@ -111,6 +111,16 @@ class Controller(polyinterface.Controller):
             # Get station meta data. We really want AIR height above ground
             c = http.request('GET', path_str)
             awdata = json.loads(c.data.decode('utf-8'))
+            for station in awdata['stations']:
+                LOGGER.info('found station: ' + str(station['location_id']) + ' ' + station['name'])
+                if station['location_id'] == self.station:
+                    LOGGER.debug('-----------------------------------')
+                    LOGGER.debug(station['devices'])
+                    for device in station['devices']:
+                        LOGGER.info('  ' + device['serial_number'])
+                else:
+                    LOGGER.info('skipping station')
+
             LOGGER.info('station devices:')
             self.station_type = 'SMART'
             for device in awdata['stations'][0]['devices']:
@@ -387,6 +397,11 @@ class Controller(polyinterface.Controller):
             This is going to need changing to handle Tempest device
             as all data comes in one array.
             """
+
+            """
+            Should probably skip an data that is not for this station
+            """
+
             if (data["type"] == "obs_air"):
                 # process air data
                 tm = data['obs'][0][0] # ts
@@ -481,15 +496,8 @@ class Controller(polyinterface.Controller):
                 windspeed = ws
                 #ra = .58 # just over half a mm of rain each minute
                 
-                self.nodes['wind'].setDriver('ST', ws)
-                self.nodes['wind'].setDriver('GV0', wd)
-                self.nodes['wind'].setDriver('GV1', wg)
-                self.nodes['wind'].setDriver('GV2', wd)
-                self.nodes['wind'].setDriver('GV3', wl)
-
-                self.nodes['light'].setDriver('ST', uv)
-                self.nodes['light'].setDriver('GV0', sr)
-                self.nodes['light'].setDriver('GV1', il)
+                self.nodes['wind'].update(ws, wd, wg, wl)
+                self.nodes['light'].update(uv, sr, il)
 
                 rain = self.nodes['rain']
                 rr = (ra * 60) / it
@@ -995,9 +1003,9 @@ class LightNode(polyinterface.Node):
         super(LightNode, self).setDriver(driver, value, report=True, force=True)
 
     def update(self, uv, sr, il):
-        selfSetDriver('ST', uv)
-        selfSetDriver('GV0', sr)
-        selfSetDriver('GV1', il)
+        self.setDriver('ST', uv)
+        self.setDriver('GV0', sr)
+        self.setDriver('GV1', il)
 
 class LightningNode(polyinterface.Node):
     id = 'lightning'
