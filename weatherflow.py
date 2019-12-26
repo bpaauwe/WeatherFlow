@@ -44,6 +44,7 @@ class Controller(polyinterface.Controller):
         self.station = ''
         self.agl = 0.0
         self.elevation = 0.0
+        self.devices = []
 
     def process_config(self, config):
         # This isn't really what the name implies, it is getting called
@@ -113,11 +114,12 @@ class Controller(polyinterface.Controller):
             awdata = json.loads(c.data.decode('utf-8'))
             for station in awdata['stations']:
                 LOGGER.info('found station: ' + str(station['location_id']) + ' ' + station['name'])
-                if station['location_id'] == self.station:
+                if str(station['location_id']) == str(self.station):
                     LOGGER.debug('-----------------------------------')
                     LOGGER.debug(station['devices'])
                     for device in station['devices']:
                         LOGGER.info('  ' + device['serial_number'])
+                        self.devices.append(device['serial_number'])
                 else:
                     LOGGER.info('skipping station')
 
@@ -401,6 +403,10 @@ class Controller(polyinterface.Controller):
             """
             Should probably skip an data that is not for this station
             """
+
+            if data['serial_number'] not in self.devices:
+                LOGGER.info('skipping data, serial number ' + data['serial_number'] + ' not listed')
+                continue
 
             if (data["type"] == "obs_air"):
                 # process air data
