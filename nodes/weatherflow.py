@@ -375,7 +375,7 @@ class Controller(polyinterface.Controller):
     def udp_data(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('0.0.0.0', self.udp_port))
+        s.bind(('0.0.0.0', self.params.get('ListenPort')))
         windspeed = 0
         sky_tm = 0
         air_tm = 0
