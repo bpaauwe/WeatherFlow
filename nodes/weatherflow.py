@@ -32,7 +32,6 @@ class Controller(polyinterface.Controller):
         self.primary = self.address
         self.stopping = False
         self.stopped = True
-        self.myConfig = {}
         self.rain_data = {
                 'hourly': 0,
                 'hour' : 0,
@@ -50,55 +49,73 @@ class Controller(polyinterface.Controller):
         self.hub_timestamp = 0
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
-        self.station = ''
         self.agl = 0.0
         self.elevation = 0.0
         self.devices = []
+        self.params = node_funcs.NSParameters([{
+            'name': 'Station',
+            'default': 'set me',
+            'isRequired': True,
+            'notice': 'Station ID must be set',
+            },
+            {
+            'name': 'ListenPort',
+            'default': 50222,
+            'isRequired': False,
+            'notice': '',
+            },
+            {
+            'name': 'Sky S/N',
+            'default': '',
+            'isRequired': False,
+            'notice': '',
+            },
+            {
+            'name': 'Air S/N',
+            'default': '',
+            'isRequired': False,
+            'notice': '',
+            },
+            {
+            'name': 'Tempest S/N',
+            'default': '',
+            'isRequired': False,
+            'notice': '',
+            },
+            {
+            'name': 'Units',
+            'default': 'us',
+            'isRequired': False,
+            'notice': '',
+            },
+            {
+            'name': 'Elevation',
+            'default': 0,
+            'isRequired': False,
+            'notice': '',
+            },
+            {
+            'name': 'AGL',
+            'default': 0,
+            'isRequired': False,
+            'notice': '',
+            },
+            ])
 
     def process_config(self, config):
-        # This isn't really what the name implies, it is getting called
-        # for all non-driver database updates.  It also appears to be called
-        # after the database update has occured.  Thus it is pretty much
-        # useless for parameter checking.
-
-        # can we just ignore non-parameter changes?
-        if self.myConfig == config['customParams']:
-            return
-
-        # looks like a parameter changed, so which one?
-        new_params = config['customParams']
-
-        if new_params['Units'] != self.myConfig['Units']:
-            LOGGER.info('Changed units from %s to %s' %
-                    (self.myConfig['Units'], new_params['Units']))
-            # Ideally, we'd like to validate the entered units and
-            # report some error if they are wrong, but at this point
-            # the database has been updated.
-            # FIXME: can we call something common to set the units?
-
-            self.units = config['customParams']['Units'].lower()
-            if self.units != 'metric' and self.units != 'us' and self.units != 'uk':
-                # invalid units
-                self.units = 'metric'
-                config['customParams']['Units'] = self.units
-
-            for node in self.nodes:
-               if (node != 'hub' and node != 'controller'):
-                   LOGGER.info("Setting node " + node + " to units " + self.units);
-                   self.nodes[node].SetUnits(self.units)
-                   self.addNode(self.nodes[node])
-               else:
-                   LOGGER.info("Skipping node " + node)
-
-        if new_params['Elevation'] != self.myConfig['Elevation']:
-            LOGGER.info('Changed elevation from %s to %s' %
-                    (self.myConfig['Elevation'], new_params['Elevation']))
-
-        if new_params['ListenPort'] != self.myConfig['ListenPort']:
-            LOGGER.info('Changed UDP Port from %s to %s' %
-                    (self.myConfig['ListenPort'], new_params['ListenPort']))
-
-        self.myConfig = config['customParams']
+        (valid, changed) = self.params.update_from_polyglot(config)
+        if changed and not valid:
+            LOGGER.debug('-- configuration not yet valid')
+            self.removeNoticesAll()
+            self.params.send_notices(self)
+        elif changed and valid:
+            LOGGER.debug('-- configuration is valid')
+            self.removeNoticesAll()
+            self.configured = True
+            if self.params.isSet('Station'):
+                self.discover()
+        elif valid:
+            LOGGER.debug('-- configuration not changed, but is valid')
 
     def query_wf(self):
         """
@@ -107,12 +124,12 @@ class Controller(polyinterface.Controller):
         data here to override user entered data.  Specifically, elevation
         and units.
         """
-        if self.station == "":
+        if self.params.get('Station') == "":
             LOGGER.info('no station defined, skipping lookup.')
             return
 
         path_str = '/swd/rest/stations/'
-        path_str += self.station
+        path_str += self.params.get('Station')
         path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
 
         try:
@@ -123,7 +140,7 @@ class Controller(polyinterface.Controller):
             awdata = json.loads(c.data.decode('utf-8'))
             for station in awdata['stations']:
                 LOGGER.info('found station: ' + str(station['location_id']) + ' ' + station['name'])
-                if str(station['location_id']) == str(self.station):
+                if str(station['location_id']) == str(self.params.get('Station')):
                     LOGGER.debug('-----------------------------------')
                     LOGGER.debug(station['devices'])
                     for device in station['devices']:
@@ -146,7 +163,7 @@ class Controller(polyinterface.Controller):
 
             # Get station observations. Pull Elevation and user unit prefs.
             path_str = '/swd/rest/observations/station/'
-            path_str += self.station
+            path_str += self.params.get('Station')
             path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
             c = http.request('GET', path_str)
 
@@ -238,7 +255,7 @@ class Controller(polyinterface.Controller):
         node.SetUnits(self.units)
         self.addNode(node)
 
-        node = humdity.HumidityNode(self, self.address, 'humidity', 'Humidity')
+        node = humidity.HumidityNode(self, self.address, 'humidity', 'Humidity')
         node.SetUnits(self.units)
         self.addNode(node)
         node = pressure.PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
@@ -335,44 +352,15 @@ class Controller(polyinterface.Controller):
         return units
 
     def check_params(self):
-        """
-        Elevation, UDP port, and Units for now.
-        """
-        default_port = 50222
-        default_elevation = 0.0
-        default_units = "metric"
-
-        self.units = self.check_units()
-
-        if 'ListenPort' in self.polyConfig['customParams']:
-            self.udp_port = int(self.polyConfig['customParams']['ListenPort'])
-        else:
-            self.udp_port = default_port
-            self.polyConfig['customParams']['ListenPort'] = default_port
-
-        if 'Station' in self.polyConfig['customParams']:
-            self.station = self.polyConfig['customParams']['Station']
-
-        if 'AGL' in self.polyConfig['customParams']:
-            self.agl = float(self.polyConfig['customParams']['AGL'])
-
-        if 'Elevation' in self.polyConfig['customParams']:
-            self.elevation = float(self.polyConfig['customParams']['Elevation'])
-        else:
-            self.elevation = default_elevation
-            self.polyConfig['customParams']['Elevation'] = default_elevation
-
-        self.myConfig = self.polyConfig['customParams']
-
-        # Make sure they are in the params
-        self.addCustomParam({'ListenPort': self.udp_port,
-                    'Units': self.units,
-                    'Elevation': self.elevation})
-
-        # Remove all existing notices
         self.removeNoticesAll()
 
-        # Add a notice?
+        if self.params.get_from_polyglot(self):
+            LOGGER.debug('All required parameters are set!')
+            self.configured = True
+        else:
+            LOGGER.debug('Configuration required.')
+            LOGGER.debug('Station = ' + self.params.get('Station'))
+            self.params.send_notices(self)
 
     def remove_notices_all(self,command):
         LOGGER.info('remove_notices_all:')
