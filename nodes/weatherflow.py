@@ -12,6 +12,7 @@ import json
 import socket
 import math
 import threading
+import node_funcs
 from nodes import temperature
 from nodes import humidity
 from nodes import pressure
@@ -22,6 +23,7 @@ from nodes import lightning
 
 LOGGER = polyinterface.LOGGER
 
+@node_funcs.add_functions_as_methods(node_funcs.functions)
 class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
