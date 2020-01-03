@@ -49,7 +49,6 @@ class Controller(polyinterface.Controller):
         self.hub_timestamp = 0
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
-        self.agl = 0.0
         self.elevation = 0.0
         self.devices = []
         self.params = node_funcs.NSParameters([{
@@ -144,21 +143,21 @@ class Controller(polyinterface.Controller):
                     LOGGER.debug('-----------------------------------')
                     LOGGER.debug(station['devices'])
                     for device in station['devices']:
-                        LOGGER.info('  ' + device['serial_number'])
+                        LOGGER.info('  ' + device['serial_number'] + ' -- ' + device['device_type'])
                         self.devices.append(device['serial_number'])
+                        if device['device_type'] == 'AR':
+                            self.params.set('AGL', float(device['device_meta']['agl']))
+                            self.params.set('Air S/N', device['serial_number'])
+                        elif device['device_type' == 'ST':
+                            self.params.set('Tempest S/N', device['serial_number'])
+                            self.params.set('AGL', float(device['device_meta']['agl']))
+                        elif device['device_type' == 'SK':
+                            self.params.set('Sky S/N', device['serial_number'])
+
+
                 else:
                     LOGGER.info('skipping station')
 
-            LOGGER.info('station devices:')
-            self.station_type = 'SMART'
-            for device in awdata['stations'][0]['devices']:
-                LOGGER.info('  - ' + device['device_type'])
-                # Determine if this is an Air/Sky or Tempest
-                if device['device_type'] == 'AR':
-                    self.agl = float(device['device_meta']['agl'])
-                elif device['device_type'] == 'ST':
-                    self.agl = float(device['device_meta']['agl'])
-                    self.station_type = 'TEMPEST'
             c.close()
 
             # Get station observations. Pull Elevation and user unit prefs.
@@ -419,7 +418,7 @@ class Controller(polyinterface.Controller):
                     continue
 
                 air_tm = tm
-                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
+                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + selfparams.get('AGL'))
                 trend = self.nodes['pressure'].updateTrend(p)
                 self.nodes['pressure'].update(p, sl, trend)
                 fl = self.nodes['temperature'].ApparentTemp(t, windspeed, h)
@@ -459,7 +458,7 @@ class Controller(polyinterface.Controller):
 
                 stair_tm = tm
 
-                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.agl)
+                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.params.get('AGL'))
                 trend = self.nodes['pressure'].updateTrend(p)
                 fl = self.nodes['temperature'].ApparentTemp(t, ws, h)
                 dp = self.nodes['temperature'].Dewpoint(t, h)
