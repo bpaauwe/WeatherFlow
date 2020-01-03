@@ -49,7 +49,6 @@ class Controller(polyinterface.Controller):
         self.hub_timestamp = 0
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
-        self.elevation = 0.0
         self.devices = []
         self.params = node_funcs.NSParameters([{
             'name': 'Station',
@@ -143,6 +142,7 @@ class Controller(polyinterface.Controller):
                     LOGGER.debug(station)
                     LOGGER.debug('-----------------------------------')
                     LOGGER.debug(station['devices'])
+                    self.params.set('Elevation', float(station['station_meta']['elevation']))
                     for device in station['devices']:
                         LOGGER.info('  ' + device['serial_number'] + ' -- ' + device['device_type'])
                         self.devices.append(device['serial_number'])
@@ -191,7 +191,7 @@ class Controller(polyinterface.Controller):
             # Override entered elevation with info from station
             # TODO: Only override if current value is 0?
             #       if we do override, should this save to customParams too?
-            self.elevation = float(awdata['elevation'])
+            #self.elevation = float(awdata['elevation'])
 
             # obs is array of dictionaries. Array index 0 is what we want
             # to get current daily and yesterday daily rainfall values
@@ -420,7 +420,7 @@ class Controller(polyinterface.Controller):
                     continue
 
                 air_tm = tm
-                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + selfparams.get('AGL'))
+                sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + selfparams.get('AGL'))
                 trend = self.nodes['pressure'].updateTrend(p)
                 self.nodes['pressure'].update(p, sl, trend)
                 fl = self.nodes['temperature'].ApparentTemp(t, windspeed, h)
@@ -460,7 +460,7 @@ class Controller(polyinterface.Controller):
 
                 stair_tm = tm
 
-                sl = self.nodes['pressure'].toSeaLevel(p, self.elevation + self.params.get('AGL'))
+                sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
                 trend = self.nodes['pressure'].updateTrend(p)
                 fl = self.nodes['temperature'].ApparentTemp(t, ws, h)
                 dp = self.nodes['temperature'].Dewpoint(t, h)
