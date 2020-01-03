@@ -146,12 +146,12 @@ class Controller(polyinterface.Controller):
                         LOGGER.info('  ' + device['serial_number'] + ' -- ' + device['device_type'])
                         self.devices.append(device['serial_number'])
                         if device['device_type'] == 'AR':
-                            self.params.set('AGL', float(device['device_meta']['agl']))
                             self.params.set('Air S/N', device['serial_number'])
-                        elif device['device_type' == 'ST':
+                            self.params.set('AGL', float(device['device_meta']['agl']))
+                        elif device['device_type'] == 'ST':
                             self.params.set('Tempest S/N', device['serial_number'])
                             self.params.set('AGL', float(device['device_meta']['agl']))
-                        elif device['device_type' == 'SK':
+                        elif device['device_type'] == 'SK':
                             self.params.set('Sky S/N', device['serial_number'])
 
 
