@@ -160,7 +160,6 @@ class Controller(polyinterface.Controller):
                     LOGGER.info('skipping station')
 
             c.close()
-            poly.addCustomParam(self.params)
 
             # Get station observations. Pull Elevation and user unit prefs.
             path_str = '/swd/rest/observations/station/'
@@ -180,13 +179,13 @@ class Controller(polyinterface.Controller):
 
             if temp_unit == 'f' and dist_unit == 'mi':
                 LOGGER.info('WF says units are US')
-                self.units = 'us'
+                self.params.set('Units', 'us')
             elif temp_unit == 'c' and dist_unit == 'mi':
                 LOGGER.info('WF says units are UK')
-                self.units = 'uk'
+                self.params.set('Units', 'uk')
             else:
                 LOGGER.info('WF says units are metric')
-                self.units = 'metric'
+                self.params.set('Units', 'metric')
 
             # Override entered elevation with info from station
             # TODO: Only override if current value is 0?
@@ -203,6 +202,8 @@ class Controller(polyinterface.Controller):
             c.close()
 
             http.close()
+
+            self.params.save_params(self)
         except Exception as e:
             LOGGER.error('Bad: %s' % str(e))
 
@@ -253,26 +254,26 @@ class Controller(polyinterface.Controller):
         self.query_wf()
 
         node = temperature.TemperatureNode(self, self.address, 'temperature', 'Temperatures')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
 
         node = humidity.HumidityNode(self, self.address, 'humidity', 'Humidity')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = pressure.PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = wind.WindNode(self, self.address, 'wind', 'Wind')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = rain.PrecipitationNode(self, self.address, 'rain', 'Precipitation')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = light.LightNode(self, self.address, 'light', 'Illumination')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = lightning.LightningNode(self, self.address, 'lightning', 'Lightning')
-        node.SetUnits(self.units)
+        node.SetUnits(self.params.get('Units'))
         self.addNode(node)
 
         
@@ -549,10 +550,6 @@ class Controller(polyinterface.Controller):
 
         s.close()
         self.stopped = True
-
-    def SetUnits(self, u):
-        self.units = u
-
 
     id = 'WeatherFlow'
     name = 'WeatherFlow'
