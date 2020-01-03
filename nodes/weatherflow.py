@@ -140,6 +140,7 @@ class Controller(polyinterface.Controller):
             for station in awdata['stations']:
                 LOGGER.info('found station: ' + str(station['location_id']) + ' ' + station['name'])
                 if str(station['location_id']) == str(self.params.get('Station')):
+                    LOGGER.debug(station)
                     LOGGER.debug('-----------------------------------')
                     LOGGER.debug(station['devices'])
                     for device in station['devices']:
@@ -159,6 +160,7 @@ class Controller(polyinterface.Controller):
                     LOGGER.info('skipping station')
 
             c.close()
+            poly.addCustomParam(self.params)
 
             # Get station observations. Pull Elevation and user unit prefs.
             path_str = '/swd/rest/observations/station/'
