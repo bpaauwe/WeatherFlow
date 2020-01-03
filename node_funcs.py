@@ -198,4 +198,15 @@ class NSParameters:
 
         return (valid, changed)
 
+    def save_params(self, poly):
+        params = {}
+
+        for p in self.internal:
+            if p['isSet']:
+                params[p['name']] = p['value']
+            else:
+                params[p['name']] = p['default']
+
+        poly.addCustomParam(params)
+
 
