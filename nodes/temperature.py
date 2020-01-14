@@ -70,7 +70,8 @@ class TemperatureNode(polyinterface.Node):
     def Windchill(self, t, ws):
         # really need temp in F and speed in MPH
         tf = (t * 1.8) + 32
-        mph = ws / 0.44704
+        #mph = ws / 0.44704 # from m/s to mph
+        mph = ws / 1.609  # from kph to mph
 
         wc = 35.74 + (0.6215 * tf) - (35.75 * math.pow(mph, 0.16)) + (0.4275 * tf * math.pow(mph, 0.16))
 
