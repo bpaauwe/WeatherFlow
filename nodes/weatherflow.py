@@ -424,7 +424,7 @@ class Controller(polyinterface.Controller):
                 sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
                 trend = self.nodes['pressure'].updateTrend(p)
                 self.nodes['pressure'].update(p, sl, trend)
-                fl = self.nodes['temperature'].ApparentTemp(t, windspeed, h)
+                fl = self.nodes['temperature'].ApparentTemp(t, windspeed/3.6, h)
                 dp = self.nodes['temperature'].Dewpoint(t, h)
                 hi = self.nodes['temperature'].Heatindex(t, h)
                 wc = self.nodes['temperature'].Windchill(t, windspeed)
@@ -440,6 +440,7 @@ class Controller(polyinterface.Controller):
 
             if (data["type"] == "obs_st"):
                 tm = data['obs'][0][0]  # ts
+                # convert wind speed from m/s to kph
                 wl = data['obs'][0][1] * (18 / 5) # wind lull
                 ws = data['obs'][0][2] * (18 / 5) # wind speed
                 wg = data['obs'][0][3] * (18 / 5) # wind gust
