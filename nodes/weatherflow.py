@@ -421,7 +421,7 @@ class Controller(polyinterface.Controller):
                     continue
 
                 air_tm = tm
-                sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + selfparams.get('AGL'))
+                sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
                 trend = self.nodes['pressure'].updateTrend(p)
                 self.nodes['pressure'].update(p, sl, trend)
                 fl = self.nodes['temperature'].ApparentTemp(t, windspeed, h)
