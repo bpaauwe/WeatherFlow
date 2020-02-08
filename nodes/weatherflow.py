@@ -374,6 +374,153 @@ class Controller(polyinterface.Controller):
         st = self.poly.installprofile()
         return st
 
+    def update_rain(self, ra):
+        rain = self.nodes['rain']
+        rr = (ra * 60) / it
+        rain.setDriver('ST', rr)
+
+        self.rain_data['hourly'] = rain.hourly_accumulation(ra)
+        self.rain_data['daily'] = rain.daily_accumulation(ra)
+        self.rain_data['yesterday'] = rain.yesterday_accumulation()
+        self.rain_data['weekly'] = rain.weekly_accumulation(ra)
+        self.rain_data['monthly'] = rain.monthly_accumulation(ra)
+        self.rain_data['yearly'] = rain.yearly_accumulation(ra)
+        LOGGER.debug('RAIN %f %f %f %f %f %f %f' %
+            (ra, rr, self.rain_data['hourly'],
+                    self.rain_data['daily'], self.rain_data['weekly'],
+            self.rain_data['monthly'], self.rain_data['yearly']))
+
+        self.rain_data['hour'] = datetime.datetime.now().hour
+        self.rain_data['day'] = datetime.datetime.now().day
+        self.rain_data['month'] = datetime.datetime.now().month
+        self.rain_data['year'] = datetime.datetime.now().year
+
+        rain.setDriver('GV0', self.rain_data['hourly'])
+        rain.setDriver('GV1', self.rain_data['daily'])
+        rain.setDriver('GV2', self.rain_data['weekly'])
+        rain.setDriver('GV3', self.rain_data['monthly'])
+        rain.setDriver('GV4', self.rain_data['yearly'])
+        rain.setDriver('GV5', self.rain_data['yesterday'])
+
+        self.poly.saveCustomData(self.rain_data)
+
+    def air_data(self, data, air_tm):
+        # process air data
+        try:
+            tm = data['obs'][0][0] # ts
+            p = data['obs'][0][1]  # pressure
+            t = data['obs'][0][2]  # temp
+            h = data['obs'][0][3]  # humidity
+            ls = data['obs'][0][4] # strikes
+            ld = data['obs'][0][5] # distance
+
+            if air_tm == tm:
+                LOGGER.debug('Duplicate AIR observations, ignorning')
+                return air_tm
+
+            air_tm = tm
+            sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
+            trend = self.nodes['pressure'].updateTrend(p)
+            self.nodes['pressure'].update(p, sl, trend)
+            fl = self.nodes['temperature'].ApparentTemp(t, windspeed/3.6, h)
+            dp = self.nodes['temperature'].Dewpoint(t, h)
+            hi = self.nodes['temperature'].Heatindex(t, h)
+            wc = self.nodes['temperature'].Windchill(t, windspeed)
+
+            self.nodes['temperature'].update(t, fl, dp, hi, wc)
+            self.nodes['humidity'].update(h)
+
+            self.nodes['lightning'].update(ls, ld)
+
+            # battery voltage
+            self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
+        except:
+            LOGGER.error('Failure in processing AIR data')
+
+        return air_tm
+
+    def sky_data(self, data, sky_tm):
+        # process sky data
+        try:
+            tm = data['obs'][0][0]  # epoch
+            il = data['obs'][0][1]  # Illumination
+            uv = data['obs'][0][2]  # UV Index
+            ra = float(data['obs'][0][3])  # rain
+            wl = data['obs'][0][4] * (18 / 5) # wind lull
+            ws = data['obs'][0][5] * (18 / 5) # wind speed
+            wg = data['obs'][0][6] * (18 / 5) # wind gust
+            wd = data['obs'][0][7]  # wind direction
+            it = data['obs'][0][9]  # reporting interval
+            sr = data['obs'][0][10]  # solar radiation
+
+            if sky_tm == tm:
+                LOGGER.debug('Duplicate SKY observations, ignorning')
+                return sky_tm
+
+            sky_tm = tm
+            windspeed = ws
+            #ra = .58 # just over half a mm of rain each minute
+        
+            self.nodes['wind'].update(ws, wd, wg, wl)
+            self.nodes['light'].update(uv, sr, il)
+
+            self.update_rain(ra)
+
+            self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
+        except:
+            LOGGER.error('Failure in SKY data')
+
+        return sky_tm
+
+    def tempest_data(self, data, st_tm):
+        try:
+            tm = data['obs'][0][0]  # ts
+            # convert wind speed from m/s to kph
+            wl = data['obs'][0][1] * (18 / 5) # wind lull
+            ws = data['obs'][0][2] * (18 / 5) # wind speed
+            wg = data['obs'][0][3] * (18 / 5) # wind gust
+            wd = data['obs'][0][4]  # wind direction
+            p = data['obs'][0][6]   # pressure
+            t = data['obs'][0][7]   # temp
+            h = data['obs'][0][8]   # humidity
+            il = data['obs'][0][9]  # Illumination
+            uv = data['obs'][0][10] # UV Index
+            sr = data['obs'][0][11] # solar radiation
+            ra = float(data['obs'][0][12])  # rain
+            ls = data['obs'][0][14] # strikes
+            ld = data['obs'][0][15] # distance
+            it = data['obs'][0][17] # reporting interval
+
+            if st_tm == tm:
+                LOGGER.debug('Duplicate Tempest observations, ignorning')
+                return st_tm
+
+            st_tm = tm
+
+            sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
+            trend = self.nodes['pressure'].updateTrend(p)
+            fl = self.nodes['temperature'].ApparentTemp(t, ws, h)
+            dp = self.nodes['temperature'].Dewpoint(t, h)
+            hi = self.nodes['temperature'].Heatindex(t, h)
+            wc = self.nodes['temperature'].Windchill(t, ws)
+
+            self.nodes['pressure'].update(p, sl, trend)
+            self.nodes['temperature'].update(t, fl, dp, hi, wc)
+            self.nodes['humidity'].update(h)
+            self.nodes['lightning'].update(ls, ld)
+            self.nodes['wind'].update(ws, wd, wg, wl)
+            self.nodes['light'].update(uv, sr, il)
+
+            #TODO: add rain
+            self.update_rain(ra)
+
+            # battery voltage
+            self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
+        except:
+            LOGGER.error('Failure in TEMPEST data')
+
+        return st_tm
+
     def udp_data(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -386,161 +533,34 @@ class Controller(polyinterface.Controller):
         LOGGER.info("Starting UDP receive loop")
         while self.stopping == False:
             self.stopped = False
-            hub = s.recvfrom(1024)
-            data = json.loads(hub[0].decode("utf-8")) # hub is a truple (json, ip, port)
+            try:
+                hub = s.recvfrom(1024)
+                data = json.loads(hub[0].decode("utf-8")) # hub is a truple (json, ip, port)
+            except:
+                LOGGER.error('JSON processing of data failed')
+                continue
 
-            """
-            Depending on the type of data recieved, process it and
-            update the correct node.
-                                indexes are lower case names. I.E. 
-                                self.nodes['temperature']
-
-            This is going to need changing to handle Tempest device
-            as all data comes in one array.
-            """
-
-            """
-            Should probably skip an data that is not for this station
-            """
-
+            # skip data that's not for the configured station
             if data['serial_number'] not in self.devices:
                 LOGGER.info('skipping data, serial number ' + data['serial_number'] + ' not listed')
                 continue
 
             if (data["type"] == "obs_air"):
-                # process air data
-                tm = data['obs'][0][0] # ts
-                p = data['obs'][0][1]  # pressure
-                t = data['obs'][0][2]  # temp
-                h = data['obs'][0][3]  # humidity
-                ls = data['obs'][0][4] # strikes
-                ld = data['obs'][0][5] # distance
-
-                if air_tm == tm:
-                    LOGGER.debug('Duplicate AIR observations, ignorning')
-                    continue
-
-                air_tm = tm
-                sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
-                trend = self.nodes['pressure'].updateTrend(p)
-                self.nodes['pressure'].update(p, sl, trend)
-                fl = self.nodes['temperature'].ApparentTemp(t, windspeed/3.6, h)
-                dp = self.nodes['temperature'].Dewpoint(t, h)
-                hi = self.nodes['temperature'].Heatindex(t, h)
-                wc = self.nodes['temperature'].Windchill(t, windspeed)
-
-                self.nodes['temperature'].update(t, fl, dp, hi, wc)
-                self.nodes['humidity'].update(h)
-
-                self.nodes['lightning'].update(ls, ld)
-
-                # battery voltage
-                self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
-
+                air_tm = self.air_data(data, air_tm)
 
             if (data["type"] == "obs_st"):
-                tm = data['obs'][0][0]  # ts
-                # convert wind speed from m/s to kph
-                wl = data['obs'][0][1] * (18 / 5) # wind lull
-                ws = data['obs'][0][2] * (18 / 5) # wind speed
-                wg = data['obs'][0][3] * (18 / 5) # wind gust
-                wd = data['obs'][0][4]  # wind direction
-                p = data['obs'][0][6]   # pressure
-                t = data['obs'][0][7]   # temp
-                h = data['obs'][0][8]   # humidity
-                il = data['obs'][0][9]  # Illumination
-                uv = data['obs'][0][10] # UV Index
-                sr = data['obs'][0][11] # solar radiation
-                ra = float(data['obs'][0][12])  # rain
-                ls = data['obs'][0][14] # strikes
-                ld = data['obs'][0][15] # distance
-                it = data['obs'][0][17] # reporting interval
-
-                if st_tm == tm:
-                    LOGGER.debug('Duplicate Tempest observations, ignorning')
-                    continue
-
-                stair_tm = tm
-
-                sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
-                trend = self.nodes['pressure'].updateTrend(p)
-                fl = self.nodes['temperature'].ApparentTemp(t, ws, h)
-                dp = self.nodes['temperature'].Dewpoint(t, h)
-                hi = self.nodes['temperature'].Heatindex(t, h)
-                wc = self.nodes['temperature'].Windchill(t, ws)
-
-                self.nodes['pressure'].update(p, sl, trend)
-                self.nodes['temperature'].update(t, fl, dp, hi, wc)
-                self.nodes['humidity'].update(h)
-                self.nodes['lightning'].update(ls, ld)
-                self.nodes['wind'].update(ws, wd, wg, wl)
-                self.nodes['light'].update(uv, sr, il)
-
-                #TODO: add rain
-
-                # battery voltage
-                self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
+                st_tm = self.tempest_data(data, st_tm)
 
             if (data["type"] == "obs_sky"):
-                # process sky data
-                tm = data['obs'][0][0]  # epoch
-                il = data['obs'][0][1]  # Illumination
-                uv = data['obs'][0][2]  # UV Index
-                ra = float(data['obs'][0][3])  # rain
-                wl = data['obs'][0][4] * (18 / 5) # wind lull
-                ws = data['obs'][0][5] * (18 / 5) # wind speed
-                wg = data['obs'][0][6] * (18 / 5) # wind gust
-                wd = data['obs'][0][7]  # wind direction
-                it = data['obs'][0][9]  # reporting interval
-                sr = data['obs'][0][10]  # solar radiation
-
-                if sky_tm == tm:
-                    LOGGER.debug('Duplicate SKY observations, ignorning')
-                    continue
-
-                sky_tm = tm
-                windspeed = ws
-                #ra = .58 # just over half a mm of rain each minute
-                
-                self.nodes['wind'].update(ws, wd, wg, wl)
-                self.nodes['light'].update(uv, sr, il)
-
-                rain = self.nodes['rain']
-                rr = (ra * 60) / it
-                rain.setDriver('ST', rr)
-
-                self.rain_data['hourly'] = rain.hourly_accumulation(ra)
-                self.rain_data['daily'] = rain.daily_accumulation(ra)
-                self.rain_data['yesterday'] = rain.yesterday_accumulation()
-                self.rain_data['weekly'] = rain.weekly_accumulation(ra)
-                self.rain_data['monthly'] = rain.monthly_accumulation(ra)
-                self.rain_data['yearly'] = rain.yearly_accumulation(ra)
-                LOGGER.debug('RAIN %f %f %f %f %f %f %f' %
-                        (ra, rr, self.rain_data['hourly'],
-                        self.rain_data['daily'], self.rain_data['weekly'],
-                        self.rain_data['monthly'], self.rain_data['yearly']))
-
-                self.rain_data['hour'] = datetime.datetime.now().hour
-                self.rain_data['day'] = datetime.datetime.now().day
-                self.rain_data['month'] = datetime.datetime.now().month
-                self.rain_data['year'] = datetime.datetime.now().year
-
-                rain.setDriver('GV0', self.rain_data['hourly'])
-                rain.setDriver('GV1', self.rain_data['daily'])
-                rain.setDriver('GV2', self.rain_data['weekly'])
-                rain.setDriver('GV3', self.rain_data['monthly'])
-                rain.setDriver('GV4', self.rain_data['yearly'])
-                rain.setDriver('GV5', self.rain_data['yesterday'])
-
-                self.poly.saveCustomData(self.rain_data)
-
-                self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
+                sky_tm = self.sky_data(data, sky_tm)
 
             if (data["type"] == "device_status"):
                 if "AR" in data["serial_number"]:
                     self.setDriver('GV2', data['rssi'], report=True, force=True)
                 if "SK" in data["serial_number"]:
                     self.setDriver('GV3', data['rssi'], report=True, force=True)
+                if "ST" in data["serial_number"]:
+                    self.setDriver('GV2', data['rssi'], report=True, force=True)
 
             if (data["type"] == "hub_status"):
                 # This comes every 10 seconds, but we only update the driver
@@ -551,6 +571,7 @@ class Controller(polyinterface.Controller):
 
         s.close()
         self.stopped = True
+        self.stop()
 
     id = 'WeatherFlow'
     name = 'WeatherFlow'
