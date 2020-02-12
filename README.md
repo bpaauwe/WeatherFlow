@@ -56,6 +56,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 0.1.18 02/11/2020
+  - Trap the condition when wind speeds are none/null
 - 0.1.17 10/29/2018
   - Add rain yesterday to rain node.
   - Ignore duplicate UDP packets.
