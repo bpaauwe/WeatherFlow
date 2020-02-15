@@ -446,9 +446,18 @@ class Controller(polyinterface.Controller):
             il = data['obs'][0][1]  # Illumination
             uv = data['obs'][0][2]  # UV Index
             ra = float(data['obs'][0][3])  # rain
-            wl = data['obs'][0][4] * (18 / 5) # wind lull
-            ws = data['obs'][0][5] * (18 / 5) # wind speed
-            wg = data['obs'][0][6] * (18 / 5) # wind gust
+            if (data['obs'][0][4] is not None):
+                wl = data['obs'][0][4] * (18 / 5) # wind lull
+            else:
+                wl = 0
+            if (data['obs'][0][5] is not None):
+                ws = data['obs'][0][5] * (18 / 5) # wind speed
+            else:
+                ws = 0
+            if (data['obs'][0][6] is not None):
+                wg = data['obs'][0][6] * (18 / 5) # wind gust
+            else:
+                wg = 0
             wd = data['obs'][0][7]  # wind direction
             it = data['obs'][0][9]  # reporting interval
             sr = data['obs'][0][10]  # solar radiation
@@ -476,9 +485,18 @@ class Controller(polyinterface.Controller):
         try:
             tm = data['obs'][0][0]  # ts
             # convert wind speed from m/s to kph
-            wl = data['obs'][0][1] * (18 / 5) # wind lull
-            ws = data['obs'][0][2] * (18 / 5) # wind speed
-            wg = data['obs'][0][3] * (18 / 5) # wind gust
+            if (data['obs'][0][1] is not None):
+                wl = data['obs'][0][1] * (18 / 5) # wind lull
+            else:
+                wl = 0
+            if (data['obs'][0][2] is not None):
+                ws = data['obs'][0][2] * (18 / 5) # wind speed
+            else:
+                ws = 0
+            if (data['obs'][0][3] is not None):
+                wg = data['obs'][0][3] * (18 / 5) # wind gust
+            else:
+                wg = 0
             wd = data['obs'][0][4]  # wind direction
             p = data['obs'][0][6]   # pressure
             t = data['obs'][0][7]   # temp
