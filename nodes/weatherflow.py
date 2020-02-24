@@ -20,6 +20,7 @@ from nodes import rain
 from nodes import wind
 from nodes import light
 from nodes import lightning
+from nodes import hub
 
 LOGGER = polyinterface.LOGGER
 
@@ -27,8 +28,9 @@ LOGGER = polyinterface.LOGGER
 class Controller(polyinterface.Controller):
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
-        self.name = 'WeatherFlow'
-        self.address = 'hub'
+        # are these overriding the class variables?
+        self.name = 'WeatherFlow' 
+        self.address = 'wf'
         self.primary = self.address
         self.stopping = False
         self.stopped = True
@@ -47,6 +49,7 @@ class Controller(polyinterface.Controller):
                 }
         self.hb = 0
         self.hub_timestamp = 0
+        self.tempest = False
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
         self.devices = []
@@ -145,15 +148,20 @@ class Controller(polyinterface.Controller):
                     self.params.set('Elevation', float(station['station_meta']['elevation']))
                     for device in station['devices']:
                         LOGGER.info('  ' + device['serial_number'] + ' -- ' + device['device_type'])
-                        self.devices.append(device['serial_number'])
+                        if device['serial_number'] not in self.devices:
+                            self.devices.append(device['serial_number'])
+
                         if device['device_type'] == 'AR':
                             self.params.set('Air S/N', device['serial_number'])
                             self.params.set('AGL', float(device['device_meta']['agl']))
+                            self.Tempest = False
                         elif device['device_type'] == 'ST':
                             self.params.set('Tempest S/N', device['serial_number'])
                             self.params.set('AGL', float(device['device_meta']['agl']))
+                            self.Tempest = True
                         elif device['device_type'] == 'SK':
                             self.params.set('Sky S/N', device['serial_number'])
+                            self.Tempest = False
 
 
                 else:
@@ -276,6 +284,16 @@ class Controller(polyinterface.Controller):
         node.SetUnits(self.params.get('Units'))
         self.addNode(node)
 
+        # TODO: Add hub node with battery and rssi (and sensor status?) info
+        #  There are two different hub node ID's, one for air/sky and one
+        #  for tempest.  Use self.devices to determine which we want to 
+        #  create here.
+        #  self.devices[] holds the devices that we want to track.
+        if self.tempest:
+            node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
+        else:
+            node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
+        self.addNode(node)
         
         if 'customData' in self.polyConfig:
             try:
@@ -374,10 +392,13 @@ class Controller(polyinterface.Controller):
         st = self.poly.installprofile()
         return st
 
-    def update_rain(self, ra):
-        rain = self.nodes['rain']
-        rr = (ra * 60) / it
-        rain.setDriver('ST', rr)
+    def update_rain(self, ra, it):
+        try:
+            rain = self.nodes['rain']
+            rr = (ra * 60) / it
+            rain.setDriver('ST', rr)
+        except Exception as e:
+            LOGGER.error(str(e))
 
         self.rain_data['hourly'] = rain.hourly_accumulation(ra)
         self.rain_data['daily'] = rain.daily_accumulation(ra)
@@ -433,6 +454,7 @@ class Controller(polyinterface.Controller):
             self.nodes['lightning'].update(ls, ld)
 
             # battery voltage
+            self.nodes['hub'].update(data['obs'][0][16], None)
             self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
         except:
             LOGGER.error('Failure in processing AIR data')
@@ -473,8 +495,9 @@ class Controller(polyinterface.Controller):
             self.nodes['wind'].update(ws, wd, wg, wl)
             self.nodes['light'].update(uv, sr, il)
 
-            self.update_rain(ra)
+            self.update_rain(ra, it)
 
+            self.nodes['hub'].update(None, data['obs'][0][16])
             self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
         except:
             LOGGER.error('Failure in SKY data')
@@ -529,11 +552,12 @@ class Controller(polyinterface.Controller):
             self.nodes['wind'].update(ws, wd, wg, wl)
             self.nodes['light'].update(uv, sr, il)
 
-            #TODO: add rain
-            self.update_rain(ra)
+            self.update_rain(ra, it)
 
             # battery voltage
+            self.nodes['hub'].update(data['obs'][0][16], None)
             self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
+
         except:
             LOGGER.error('Failure in TEMPEST data')
 
@@ -560,7 +584,7 @@ class Controller(polyinterface.Controller):
 
             # skip data that's not for the configured station
             if data['serial_number'] not in self.devices:
-                LOGGER.info('skipping data, serial number ' + data['serial_number'] + ' not listed')
+                #LOGGER.info('skipping data, serial number ' + data['serial_number'] + ' not listed')
                 continue
 
             if (data["type"] == "obs_air"):
@@ -575,10 +599,16 @@ class Controller(polyinterface.Controller):
             if (data["type"] == "device_status"):
                 if "AR" in data["serial_number"]:
                     self.setDriver('GV2', data['rssi'], report=True, force=True)
+                    self.nodes['hub'].update_rssi(data['rssi'], None)
+                    self.nodes['hub'].update_sensors(data['sensor_status'])
                 if "SK" in data["serial_number"]:
                     self.setDriver('GV3', data['rssi'], report=True, force=True)
+                    self.nodes['hub'].update_rssi(None, data['rssi'])
+                    self.nodes['hub'].update_sensors(data['sensor_status'])
                 if "ST" in data["serial_number"]:
                     self.setDriver('GV2', data['rssi'], report=True, force=True)
+                    self.nodes['hub'].update_rssi(data['rssi'])
+                    self.nodes['hub'].update_sensors(data['sensor_status'])
 
             if (data["type"] == "hub_status"):
                 # This comes every 10 seconds, but we only update the driver
@@ -593,7 +623,7 @@ class Controller(polyinterface.Controller):
 
     id = 'WeatherFlow'
     name = 'WeatherFlow'
-    address = 'hub'
+    address = 'wf'
     stopping = False
     hint = [1, 11, 0, 0]
     units = 'metric'
