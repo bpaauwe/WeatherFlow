@@ -12,10 +12,14 @@ ST-ctl-GV3-NAME = Sky RSSI
 ST-ctl-GV4-NAME = Hub Seconds Since Seen
 
 # mynodetype
+ND-hub0-NAME=Sensor Status
+ND-hub0-ICON=Input
 ND-hub1-NAME=Sensor Status
 ND-hub1-ICON=Input
 ND-hub2-NAME=Sensor Status
 ND-hub2-ICON=Input
+ND-hub3-NAME=Sensor Status
+ND-hub3-ICON=Input
 ST-HUB-GV0-NAME = Air Battery
 ST-HUB-GV1-NAME = Sky Battery
 ST-HUB-GV2-NAME = Air RSSI

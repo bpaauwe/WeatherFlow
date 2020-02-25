@@ -129,6 +129,7 @@ class Controller(polyinterface.Controller):
             LOGGER.info('no station defined, skipping lookup.')
             return
 
+        self.devices = []  # clear the devcies array
         path_str = '/swd/rest/stations/'
         path_str += self.params.get('Station')
         path_str += '?api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
@@ -219,7 +220,8 @@ class Controller(polyinterface.Controller):
     def start(self):
         LOGGER.info('Starting WeatherFlow Node Server')
         self.check_params()
-        self.discover()
+        if self.params.isSet('Station'):
+            self.discover()
 
         LOGGER.info('starting thread for UDP data')
         self.udp = threading.Thread(target = self.udp_data)
@@ -259,6 +261,18 @@ class Controller(polyinterface.Controller):
                 - Lightning (strikes, distance)
         """
 
+        """
+        Clear any existing nodes so they can be properly created
+        self.delNode('temperature')
+        self.delNode('humidity')
+        self.delNode('pressure')
+        self.delNode('wind')
+        self.delNode('rain')
+        self.delNode('light')
+        self.delNode('lightning')
+        """
+        self.delNode('hub')
+
         self.query_wf()
 
         node = temperature.TemperatureNode(self, self.address, 'temperature', 'Temperatures')
@@ -289,11 +303,16 @@ class Controller(polyinterface.Controller):
         #  for tempest.  Use self.devices to determine which we want to 
         #  create here.
         #  self.devices[] holds the devices that we want to track.
+        LOGGER.error('Attempt to add sensor status node')
         if self.tempest:
             node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
         else:
             node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
-        self.addNode(node)
+        LOGGER.error('In theory, node has been created, so addit')
+        try:
+            self.addNode(node)
+        except Exception as e:
+            LOGGER.error('Error adding sensor status node: ' + str(e))
         
         if 'customData' in self.polyConfig:
             try:
@@ -455,7 +474,7 @@ class Controller(polyinterface.Controller):
 
             # battery voltage
             self.nodes['hub'].update(data['obs'][0][16], None)
-            self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
+            #self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
         except:
             LOGGER.error('Failure in processing AIR data')
 
@@ -498,7 +517,7 @@ class Controller(polyinterface.Controller):
             self.update_rain(ra, it)
 
             self.nodes['hub'].update(None, data['obs'][0][16])
-            self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
+            #self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
         except:
             LOGGER.error('Failure in SKY data')
 
@@ -556,7 +575,7 @@ class Controller(polyinterface.Controller):
 
             # battery voltage
             self.nodes['hub'].update(data['obs'][0][16], None)
-            self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
+            #self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
 
         except:
             LOGGER.error('Failure in TEMPEST data')
@@ -598,15 +617,15 @@ class Controller(polyinterface.Controller):
 
             if (data["type"] == "device_status"):
                 if "AR" in data["serial_number"]:
-                    self.setDriver('GV2', data['rssi'], report=True, force=True)
+                    #self.setDriver('GV2', data['rssi'], report=True, force=True)
                     self.nodes['hub'].update_rssi(data['rssi'], None)
                     self.nodes['hub'].update_sensors(data['sensor_status'])
                 if "SK" in data["serial_number"]:
-                    self.setDriver('GV3', data['rssi'], report=True, force=True)
+                    #self.setDriver('GV3', data['rssi'], report=True, force=True)
                     self.nodes['hub'].update_rssi(None, data['rssi'])
                     self.nodes['hub'].update_sensors(data['sensor_status'])
                 if "ST" in data["serial_number"]:
-                    self.setDriver('GV2', data['rssi'], report=True, force=True)
+                    #self.setDriver('GV2', data['rssi'], report=True, force=True)
                     self.nodes['hub'].update_rssi(data['rssi'])
                     self.nodes['hub'].update_sensors(data['sensor_status'])
 
