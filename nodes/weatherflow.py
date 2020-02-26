@@ -46,6 +46,7 @@ class Controller(polyinterface.Controller):
                 'yearly': 0,
                 'year': 0,
                 'yesterday': 0,
+                'level': 30,
                 }
         self.hb = 0
         self.hub_timestamp = 0
@@ -53,6 +54,7 @@ class Controller(polyinterface.Controller):
         self.poly.onConfig(self.process_config)
         self.poly.onStop(self.my_stop)
         self.devices = []
+        self.discovered = ""
         self.params = node_funcs.NSParameters([{
             'name': 'Station',
             'default': 'set me',
@@ -113,7 +115,7 @@ class Controller(polyinterface.Controller):
             LOGGER.debug('-- configuration is valid')
             self.removeNoticesAll()
             self.configured = True
-            if self.params.isSet('Station'):
+            if self.params.isSet('Station') and (self.discovered != "") and (self.discoverd != self.params.get('Station')):
                 self.discover()
         elif valid:
             LOGGER.debug('-- configuration not changed, but is valid')
@@ -222,9 +224,10 @@ class Controller(polyinterface.Controller):
         self.set_logging_level()
         self.check_params()
         if self.params.isSet('Station'):
+            LOGGER.info('Discover station info / create nodes')
             self.discover()
 
-        LOGGER.info('starting thread for UDP data')
+        LOGGER.info('Starting thread for UDP data')
         self.udp = threading.Thread(target = self.udp_data)
         self.udp.daemon = True
         self.udp.start()
@@ -272,9 +275,11 @@ class Controller(polyinterface.Controller):
         self.delNode('light')
         self.delNode('lightning')
         """
+        LOGGER.debug('deleting existing sensor status node')
         self.delNode('hub')
 
         self.query_wf()
+        self.discovered = self.params.get('Station')
 
         node = temperature.TemperatureNode(self, self.address, 'temperature', 'Temperatures')
         node.SetUnits(self.params.get('Units'))
@@ -304,12 +309,12 @@ class Controller(polyinterface.Controller):
         #  for tempest.  Use self.devices to determine which we want to 
         #  create here.
         #  self.devices[] holds the devices that we want to track.
-        LOGGER.error('Attempt to add sensor status node')
+        LOGGER.debug('Attempt to add sensor status node')
         if self.tempest:
             node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
         else:
             node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
-        LOGGER.error('In theory, node has been created, so addit')
+        LOGGER.debug('Sensor status node has been created, so add it')
         try:
             self.addNode(node)
         except Exception as e:
@@ -648,14 +653,14 @@ class Controller(polyinterface.Controller):
             except:
                 LOGGER.error('set_logging_level: get saved log level failed.')
 
-            if level is None:
-                level = 30
-
+        if level is None:
+            level = 30
             level = int(level)
         else:
             level = int(level['value'])
 
         self.save_log_level(level)
+
         LOGGER.info('set_logging_level: Setting log level to %d' % level)
         LOGGER.setLevel(level)
 

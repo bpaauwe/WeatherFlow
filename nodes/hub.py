@@ -28,14 +28,13 @@ class HubNode(polyinterface.Node):
     primary = ''
 
     def __init__(self, controller, primary, address, name, devices):
-        LOGGER.error('In Hub node init.....')
         self.tempest = False
         self.sky = False
         self.air = False
         for device in devices:
             if 'SK' in device:
                 self.sky = True
-                LOGGER.error('add sky battery and RSSI')
+                LOGGER.debug('add sky battery and RSSI')
                 HubNode.drivers.append({'driver': 'GV1', 'value': 0, 'uom': 72})
                 HubNode.drivers.append({'driver': 'GV3', 'value': 0, 'uom': 56})
                 HubNode.drivers.append({'driver': 'GV13', 'value': 0, 'uom': 25})
@@ -43,7 +42,7 @@ class HubNode(polyinterface.Node):
                 HubNode.drivers.append({'driver': 'GV15', 'value': 0, 'uom': 25})
             if 'AR' in device:
                 self.air = True
-                LOGGER.error('add air battery and RSSI')
+                LOGGER.debug('add air battery and RSSI')
                 HubNode.drivers.append({'driver': 'GV0', 'value': 0, 'uom': 72})
                 HubNode.drivers.append({'driver': 'GV2', 'value': 0, 'uom': 56})
                 HubNode.drivers.append({'driver': 'GV7', 'value': 0, 'uom': 25})
@@ -54,7 +53,7 @@ class HubNode(polyinterface.Node):
                 HubNode.drivers.append({'driver': 'GV12', 'value': 0, 'uom': 25})
             if 'ST' in device:
                 self.tempest = True
-                LOGGER.error('add tempest battery and RSSI')
+                LOGGER.debug('add tempest battery and RSSI')
                 HubNode.drivers.append({'driver': 'GV5', 'value': 0, 'uom': 72})
                 HubNode.drivers.append({'driver': 'GV6', 'value': 0, 'uom': 56})
 

@@ -38,15 +38,19 @@ def update_driver(self, driver, value, force=False, prec=3):
 def get_saved_log_level(self):
     if 'customData' in self.polyConfig:
         if 'level' in self.polyConfig['customData']:
+            LOGGER.error('Found saved log level ' + str(self.polyConfig['customData']['level']))
             return self.polyConfig['customData']['level']
+        else:
+            LOGGER.error('No custom data key \"level\"')
+    else:
+        LOGGER.error('cusomData does not exist')
 
-    return 0
+    return 30 
 
 def save_log_level(self, level):
-    level_data = {
-            'level': level,
-            }
-    self.poly.saveCustomData(level_data)
+    LOGGER.error('saving log level to customdata')
+    self.rain_data['level'] = level
+    self.poly.saveCustomData(self.rain_data)
 
 def set_logging_level(self, level=None):
     if level is None:
