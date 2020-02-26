@@ -67,6 +67,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.1 02/26/2020
+  - Fix startup sequence to only call discover once
+  - Fix log level save/restore
 - 2.0.0 02/26/2020
   - Add support for Tempest weather station.
   - Only process data packets that match station device serial numbers.
