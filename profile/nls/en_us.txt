@@ -4,6 +4,7 @@ ND-WeatherFlow-ICON = Weather
 CMD-ctl-DISCOVER-NAME = Re-Discover
 CMD-ctl-UPDATE_PROFILE-NAME = Update Profile
 CMD-ctl-REMOVE_NOTICES_ALL-NAME = Remove Notices
+CMD-ctl-DEBUG-NAME = Log Level
 ST-ctl-ST-NAME = NodeServer Online
 ST-ctl-GV0-NAME = Air Battery
 ST-ctl-GV1-NAME = Sky Battery
@@ -148,3 +149,11 @@ EN_WIND_DIRECTION-15 = NNW
 
 EN_SENSOR_STATUS-0 = OK
 EN_SENSOR_STATUS-1 = Failed
+
+DBG-0 = Off
+DBG-10 = Debug
+DBG-20 = Info
+DBG-30 = Warning
+DBG-40 = Error
+DBG-50 = Critical
+

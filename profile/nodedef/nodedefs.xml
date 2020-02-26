@@ -16,6 +16,9 @@
               <cmd id="DISCOVER" />
               <cmd id="REMOVE_NOTICES_ALL" />
               <cmd id="UPDATE_PROFILE" />
+			  <cmd id="DEBUG">
+				  <p id="" editor="DEBUG" init="30" />
+			  </cmd>
             </accepts>
         </cmds>
     </nodeDef>

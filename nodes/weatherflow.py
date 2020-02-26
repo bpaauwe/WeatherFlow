@@ -219,6 +219,7 @@ class Controller(polyinterface.Controller):
 
     def start(self):
         LOGGER.info('Starting WeatherFlow Node Server')
+        self.set_logging_level()
         self.check_params()
         if self.params.isSet('Station'):
             self.discover()
@@ -640,6 +641,24 @@ class Controller(polyinterface.Controller):
         self.stopped = True
         self.stop()
 
+    def set_logging_level(self, level=None):
+        if level is None:
+            try:
+                level = self.get_saved_log_level()
+            except:
+                LOGGER.error('set_logging_level: get saved log level failed.')
+
+            if level is None:
+                level = 30
+
+            level = int(level)
+        else:
+            level = int(level['value'])
+
+        self.save_log_level(level)
+        LOGGER.info('set_logging_level: Setting log level to %d' % level)
+        LOGGER.setLevel(level)
+
     id = 'WeatherFlow'
     name = 'WeatherFlow'
     address = 'wf'
@@ -649,7 +668,8 @@ class Controller(polyinterface.Controller):
     commands = {
         'DISCOVER': discover,
         'UPDATE_PROFILE': update_profile,
-        'REMOVE_NOTICES_ALL': remove_notices_all
+        'REMOVE_NOTICES_ALL': remove_notices_all,
+        'DEBUG': set_logging_level,
     }
     # Hub status information here: battery and rssi values.
     drivers = [
