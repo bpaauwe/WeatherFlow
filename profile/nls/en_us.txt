@@ -4,6 +4,7 @@ ND-WeatherFlow-ICON = Weather
 CMD-ctl-DISCOVER-NAME = Re-Discover
 CMD-ctl-UPDATE_PROFILE-NAME = Update Profile
 CMD-ctl-REMOVE_NOTICES_ALL-NAME = Remove Notices
+CMD-ctl-DEBUG-NAME = Log Level
 ST-ctl-ST-NAME = NodeServer Online
 ST-ctl-GV0-NAME = Air Battery
 ST-ctl-GV1-NAME = Sky Battery
@@ -12,6 +13,30 @@ ST-ctl-GV3-NAME = Sky RSSI
 ST-ctl-GV4-NAME = Hub Seconds Since Seen
 
 # mynodetype
+ND-hub0-NAME=Sensor Status
+ND-hub0-ICON=Input
+ND-hub1-NAME=Sensor Status
+ND-hub1-ICON=Input
+ND-hub2-NAME=Sensor Status
+ND-hub2-ICON=Input
+ND-hub3-NAME=Sensor Status
+ND-hub3-ICON=Input
+ST-HUB-GV0-NAME = Air Battery
+ST-HUB-GV1-NAME = Sky Battery
+ST-HUB-GV2-NAME = Air RSSI
+ST-HUB-GV3-NAME = Sky RSSI
+ST-HUB-GV5-NAME = Tempest Battery
+ST-HUB-GV6-NAME = Tempest RSSI
+ST-HUB-GV7-NAME = Lightning
+ST-HUB-GV8-NAME = Lightning Noise
+ST-HUB-GV9-NAME = Lightning disturber
+ST-HUB-GV10-NAME = Pressure
+ST-HUB-GV11-NAME = Temperature
+ST-HUB-GV12-NAME = Humidity
+ST-HUB-GV13-NAME = Wind
+ST-HUB-GV14-NAME = Precipitation
+ST-HUB-GV15-NAME = Light/UV
+
 ND-temperature-NAME = Temperatures
 ND-temperature-ICON = Input
 ND-temperatureUK-NAME = Temperatures
@@ -121,3 +146,14 @@ EN_WIND_DIRECTION-12 = W
 EN_WIND_DIRECTION-13 = WNW
 EN_WIND_DIRECTION-14 = NW
 EN_WIND_DIRECTION-15 = NNW
+
+EN_SENSOR_STATUS-0 = OK
+EN_SENSOR_STATUS-1 = Failed
+
+DBG-0 = Off
+DBG-10 = Debug
+DBG-20 = Info
+DBG-30 = Warning
+DBG-40 = Error
+DBG-50 = Critical
+

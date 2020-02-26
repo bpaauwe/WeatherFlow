@@ -4,13 +4,9 @@
     <nodeDef id="WeatherFlow" nodeType="139" nls="ctl">
         <editors />
         <sts>
-		<st id="ST" editor="bool" />
-		<st id="GV0" editor="I_VOLTS" />
-		<st id="GV1" editor="I_VOLTS" />
-		<st id="GV2" editor="I_RSSI" />
-		<st id="GV3" editor="I_RSSI" />
-		<st id="GV4" editor="I_SECONDS" />
-	</sts>
+			<st id="ST" editor="bool" />
+			<st id="GV4" editor="I_SECONDS" />
+		</sts>
         <cmds>
            <sends>
              <cmd id="DON" />
@@ -20,11 +16,69 @@
               <cmd id="DISCOVER" />
               <cmd id="REMOVE_NOTICES_ALL" />
               <cmd id="UPDATE_PROFILE" />
+			  <cmd id="DEBUG">
+				  <p id="" editor="DEBUG" init="30" />
+			  </cmd>
             </accepts>
         </cmds>
     </nodeDef>
 
     <!-- mynodetype -->
+	<nodeDef id="hub0" nodeType="139" nls="HUB">
+        <sts>
+			<st id="GV1" editor="I_VOLTS" />
+			<st id="GV3" editor="I_RSSI" />
+			<st id="GV13" editor="I_SENSOR_STATUS" />
+			<st id="GV14" editor="I_SENSOR_STATUS" />
+			<st id="GV15" editor="I_SENSOR_STATUS" />
+		</sts>
+	</nodeDef>
+
+	<nodeDef id="hub1" nodeType="139" nls="HUB">
+        <sts>
+			<st id="GV0" editor="I_VOLTS" />
+			<st id="GV2" editor="I_RSSI" />
+			<st id="GV7" editor="I_SENSOR_STATUS" />
+			<st id="GV8" editor="I_SENSOR_STATUS" />
+			<st id="GV9" editor="I_SENSOR_STATUS" />
+			<st id="GV10" editor="I_SENSOR_STATUS" />
+		</sts>
+	</nodeDef>
+
+	<nodeDef id="hub2" nodeType="139" nls="HUB">
+        <sts>
+			<st id="GV5" editor="I_VOLTS" />
+			<st id="GV6" editor="I_RSSI" />
+			<st id="GV7" editor="I_SENSOR_STATUS" />
+			<st id="GV8" editor="I_SENSOR_STATUS" />
+			<st id="GV9" editor="I_SENSOR_STATUS" />
+			<st id="GV10" editor="I_SENSOR_STATUS" />
+			<st id="GV11" editor="I_SENSOR_STATUS" />
+			<st id="GV12" editor="I_SENSOR_STATUS" />
+			<st id="GV13" editor="I_SENSOR_STATUS" />
+			<st id="GV14" editor="I_SENSOR_STATUS" />
+			<st id="GV15" editor="I_SENSOR_STATUS" />
+		</sts>
+	</nodeDef>
+
+	<nodeDef id="hub3" nodeType="139" nls="HUB">
+        <sts>
+			<st id="GV0" editor="I_VOLTS" />
+			<st id="GV1" editor="I_VOLTS" />
+			<st id="GV2" editor="I_RSSI" />
+			<st id="GV3" editor="I_RSSI" />
+			<st id="GV7" editor="I_SENSOR_STATUS" />
+			<st id="GV8" editor="I_SENSOR_STATUS" />
+			<st id="GV9" editor="I_SENSOR_STATUS" />
+			<st id="GV10" editor="I_SENSOR_STATUS" />
+			<st id="GV11" editor="I_SENSOR_STATUS" />
+			<st id="GV12" editor="I_SENSOR_STATUS" />
+			<st id="GV13" editor="I_SENSOR_STATUS" />
+			<st id="GV14" editor="I_SENSOR_STATUS" />
+			<st id="GV15" editor="I_SENSOR_STATUS" />
+		</sts>
+	</nodeDef>
+
     <nodeDef id="temperature" nodeType="139" nls="139T">
         <editors />
         <sts>
