@@ -47,6 +47,7 @@ class Controller(polyinterface.Controller):
                 'year': 0,
                 'yesterday': 0,
                 'level': 30,
+                'station': '',
                 }
         self.hb = 0
         self.hub_timestamp = 0
@@ -245,6 +246,7 @@ class Controller(polyinterface.Controller):
         LOGGER.info('Starting WeatherFlow Node Server')
         self.set_logging_level()
         self.check_params()
+        self.read_custom_data()
         if self.params.isSet('Station'):
             LOGGER.info('Discover station info / create nodes')
             self.discover()
@@ -287,19 +289,6 @@ class Controller(polyinterface.Controller):
                 - Lightning (strikes, distance)
         """
 
-        """
-        Clear any existing nodes so they can be properly created
-        self.delNode('temperature')
-        self.delNode('humidity')
-        self.delNode('pressure')
-        self.delNode('wind')
-        self.delNode('rain')
-        self.delNode('light')
-        self.delNode('lightning')
-        """
-        LOGGER.debug('deleting existing sensor status node')
-        self.delNode('hub')
-
         self.query_wf()
         self.discovered = self.params.get('Station')
 
@@ -331,7 +320,21 @@ class Controller(polyinterface.Controller):
         #  for tempest.  Use self.devices to determine which we want to 
         #  create here.
         #  self.devices[] holds the devices that we want to track.
+        # TODO: Wait for hub node to really be deleted.
+        if self.rain_data['station'] != self.params.get('Station'):
+                LOGGER.info('Station has changed from ' + 
+                        self.rain_data['station'] + ' to ' +
+                        self.params.get('Station'))
+                self.rain_data['station'] = self.params.get('Station')
+                self.poly.saveCustomData(self.rain_data)
+                LOGGER.debug(self.polyConfig['customData'])
+
+                LOGGER.debug('deleting existing sensor status node')
+                self.delNode('hub')
+                time.sleep(3)  # give it some time to actually happen
+
         LOGGER.debug('Attempt to add sensor status node')
+
         if self.tempest:
             node = hub.HubNode(self, self.address, 'hub', 'Hub', self.devices);
         else:
@@ -342,6 +345,16 @@ class Controller(polyinterface.Controller):
         except Exception as e:
             LOGGER.error('Error adding sensor status node: ' + str(e))
         
+                # TODO: Can we query the current accumulation data from
+                # weatherflow servers???
+
+        self.nodes['rain'].InitializeRain(self.rain_data)
+
+            # Might be able to get some information from API using station
+            # number:
+            # swd.weatherflow.com/swd/rest/observations/station/<num>?apikey=
+
+    def read_custom_data(self):
         if 'customData' in self.polyConfig:
             try:
                 self.rain_data['hourly'] = self.polyConfig['customData']['hourly']
@@ -354,6 +367,8 @@ class Controller(polyinterface.Controller):
                 self.rain_data['month'] = self.polyConfig['customData']['month']
                 self.rain_data['year'] = self.polyConfig['customData']['year']
                 self.rain_data['yesterday'] = self.polyConfig['customData']['yesterday']
+                self.rain_data['level'] = self.polyConfig['customData']['level']
+                self.rain_data['station'] = self.polyConfig['customData']['station']
             except: 
                 self.rain_data['hourly'] = 0
                 self.rain_data['daily'] = 0
@@ -366,14 +381,6 @@ class Controller(polyinterface.Controller):
                 self.rain_data['week'] = datetime.datetime.now().isocalendar()[1]
                 self.rain_data['month'] = datetime.datetime.now().month
                 self.rain_data['year'] = datetime.datetime.now().year
-                # TODO: Can we query the current accumulation data from
-                # weatherflow servers???
-
-            self.nodes['rain'].InitializeRain(self.rain_data)
-
-            # Might be able to get some information from API using station
-            # number:
-            # swd.weatherflow.com/swd/rest/observations/station/<num>?apikey=
 
     def heartbeat(self):
         LOGGER.debug('heartbeat hb={}'.format(self.hb))
@@ -514,10 +521,13 @@ class Controller(polyinterface.Controller):
             sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
             trend = self.nodes['pressure'].updateTrend(p)
             self.nodes['pressure'].update(p, sl, trend)
-            fl = self.nodes['temperature'].ApparentTemp(t, windspeed/3.6, h)
-            dp = self.nodes['temperature'].Dewpoint(t, h)
-            hi = self.nodes['temperature'].Heatindex(t, h)
-            wc = self.nodes['temperature'].Windchill(t, windspeed)
+            try:
+                fl = self.nodes['temperature'].ApparentTemp(t, self.windspeed/3.6, h)
+                dp = self.nodes['temperature'].Dewpoint(t, h)
+                hi = self.nodes['temperature'].Heatindex(t, h)
+                wc = self.nodes['temperature'].Windchill(t, self.windspeed)
+            except Exception as e:
+                LOGGER.error('Failure to calculate Air temps: ' + str(e))
 
             self.nodes['temperature'].update(t, fl, dp, hi, wc)
             self.nodes['humidity'].update(h)
@@ -525,8 +535,11 @@ class Controller(polyinterface.Controller):
             self.nodes['lightning'].update(ls, ld)
 
             # battery voltage
-            self.nodes['hub'].update(data['obs'][0][16], None)
-            #self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
+            try:
+                self.nodes['hub'].update(data['obs'][0][6], None)
+                #self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
+            except Exception as e:
+                LOGGER.error('Failed to update sky battery voltage: ' + str(e))
         except:
             LOGGER.error('Failure in processing AIR data')
 
@@ -560,16 +573,23 @@ class Controller(polyinterface.Controller):
                 return sky_tm
 
             sky_tm = tm
-            windspeed = ws
+            self.windspeed = ws
             #ra = .58 # just over half a mm of rain each minute
         
             self.nodes['wind'].update(ws, wd, wg, wl)
             self.nodes['light'].update(uv, sr, il)
 
-            self.update_rain(ra, it)
+            try:
+                self.update_rain(ra, it)
+            except Exception as e:
+                LOGGER.error('Failed to update rain data: ' + str(e))
 
-            self.nodes['hub'].update(None, data['obs'][0][16])
-            #self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
+            try:
+                self.nodes['hub'].update(None, data['obs'][0][8])
+                #self.setDriver('GV1', data['obs'][0][8], report=True, force=True)
+            except Exception as e:
+                LOGGER.error('Failed to update sky battery voltage: ' + str(e))
+
         except:
             LOGGER.error('Failure in SKY data')
 
@@ -638,7 +658,7 @@ class Controller(polyinterface.Controller):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(('0.0.0.0', self.params.get('ListenPort')))
-        windspeed = 0
+        self.windspeed = 0
         sky_tm = 0
         air_tm = 0
         st_tm  = 0
