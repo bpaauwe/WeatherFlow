@@ -67,6 +67,10 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.2 02/27/2020
+  - Make better use of the user units configuration
+  - Improve field labeling for sensor status values
+  - Restrict device list to one device of each type
 - 2.0.1 02/26/2020
   - Fix startup sequence to only call discover once
   - Fix log level save/restore
