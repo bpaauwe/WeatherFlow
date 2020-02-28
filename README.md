@@ -67,6 +67,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.3 02/28/2020
+  - Fix data update for sky and air
+  - Only delete sensor node when station changes.
 - 2.0.2 02/27/2020
   - Make better use of the user units configuration
   - Improve field labeling for sensor status values
