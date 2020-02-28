@@ -26,22 +26,18 @@ class LightningNode(polyinterface.Node):
 
     def SetUnits(self, u):
         self.units = u
-        if (u == 'metric'):
+        if (u == 'km'):
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 83
             self.id = 'lightning'
-        elif (u == 'uk'): 
+        elif (u == 'mi'): 
             self.drivers[0]['uom'] = 25
             self.drivers[1]['uom'] = 116
             self.id = 'lightningUK'
-        elif (u == 'us'): 
-            self.drivers[0]['uom'] = 25
-            self.drivers[1]['uom'] = 116
-            self.id = 'lightningUS'
 
     def setDriver(self, driver, value):
         if (driver == 'GV0'):
-            if (self.units != 'metric'):
+            if (self.units != 'km'):
                 value = round(value / 1.609344, 1)
         super(LightningNode, self).setDriver(driver, value, report=True, force=True)
 

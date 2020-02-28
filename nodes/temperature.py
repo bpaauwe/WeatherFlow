@@ -29,7 +29,7 @@ class TemperatureNode(polyinterface.Node):
 
     def SetUnits(self, u):
         self.units = u
-        if (u == 'metric'):  # C
+        if (u == 'c'):  # C
             self.drivers[0]['uom'] = 4
             self.drivers[1]['uom'] = 4
             self.drivers[2]['uom'] = 4
@@ -43,7 +43,7 @@ class TemperatureNode(polyinterface.Node):
             self.drivers[3]['uom'] = 4
             self.drivers[4]['uom'] = 4
             self.id = 'temperatureUK'
-        elif (u == 'us'):   # F
+        elif (u == 'f'):   # F
             self.drivers[0]['uom'] = 17
             self.drivers[1]['uom'] = 17
             self.drivers[2]['uom'] = 17
@@ -100,7 +100,7 @@ class TemperatureNode(polyinterface.Node):
             return round((hi - 32) / 1.8, 1)
 
     def setDriver(self, driver, value):
-        if (self.units == "us"):
+        if (self.units == "f"):
             value = (value * 1.8) + 32  # convert to F
 
         super(TemperatureNode, self).setDriver(driver, round(value, 1), report=True, force=True)

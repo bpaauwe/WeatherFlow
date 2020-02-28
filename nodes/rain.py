@@ -100,7 +100,7 @@ class PrecipitationNode(polyinterface.Node):
 
     def SetUnits(self, u):
         self.units = u
-        if (u == 'metric'):
+        if (u == 'mm'):
             self.drivers[0]['uom'] = 46
             self.drivers[1]['uom'] = 82
             self.drivers[2]['uom'] = 82
@@ -109,16 +109,7 @@ class PrecipitationNode(polyinterface.Node):
             self.drivers[5]['uom'] = 82
             self.drivers[6]['uom'] = 82
             self.id = 'precipitation'
-        elif (u == 'uk'): 
-            self.drivers[0]['uom'] = 46
-            self.drivers[1]['uom'] = 82
-            self.drivers[2]['uom'] = 82
-            self.drivers[3]['uom'] = 82
-            self.drivers[4]['uom'] = 82
-            self.drivers[5]['uom'] = 82
-            self.drivers[6]['uom'] = 82
-            self.id = 'precipitationUK'
-        elif (u == 'us'): 
+        elif (u == 'in'): 
             self.drivers[0]['uom'] = 24
             self.drivers[1]['uom'] = 105
             self.drivers[2]['uom'] = 105
@@ -179,7 +170,7 @@ class PrecipitationNode(polyinterface.Node):
 
         
     def setDriver(self, driver, value):
-        if (self.units == 'us'):
+        if (self.units == 'in'):
             value = round(value * 0.03937, 2)
         super(PrecipitationNode, self).setDriver(driver, value, report=True, force=True)
 

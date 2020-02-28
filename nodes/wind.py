@@ -29,17 +29,17 @@ class WindNode(polyinterface.Node):
 
     def SetUnits(self, u):
         self.units = u
-        if (u == 'metric'):
+        if (u == 'kph'):
             self.drivers[0]['uom'] = 32
             self.drivers[2]['uom'] = 32
             self.drivers[4]['uom'] = 32
             self.id = 'wind'
-        elif (u == 'uk'): 
-            self.drivers[0]['uom'] = 48
-            self.drivers[2]['uom'] = 48
-            self.drivers[4]['uom'] = 48
-            self.id = 'windUK'
-        elif (u == 'us'): 
+        if (u == 'ms'):
+            self.drivers[0]['uom'] = 40
+            self.drivers[2]['uom'] = 40
+            self.drivers[4]['uom'] = 40
+            self.id = 'wind'
+        elif (u == 'mph'): 
             self.drivers[0]['uom'] = 48
             self.drivers[2]['uom'] = 48
             self.drivers[4]['uom'] = 48
@@ -47,7 +47,7 @@ class WindNode(polyinterface.Node):
 
     def setDriver(self, driver, value):
         if (driver == 'ST' or driver == 'GV1' or driver == 'GV3'):
-            if (self.units != 'metric'):
+            if (self.units == 'mph'):
                 value = round(value / 1.609344, 2)
         super(WindNode, self).setDriver(driver, value, report=True, force=True)
 

@@ -32,15 +32,11 @@ class PressureNode(polyinterface.Node):
         # what about the ID, can we dynamically change that to change
         # the node def?
         self.units = u
-        if (u == 'metric'):  # millibar
+        if (u == 'mb'):  # millibar
             self.drivers[0]['uom'] = 117
             self.drivers[1]['uom'] = 117
             self.id = 'pressure'
-        elif (u == 'uk'):  # millibar
-            self.drivers[0]['uom'] = 117 
-            self.drivers[1]['uom'] = 117
-            self.id = 'pressureUK'
-        elif (u == 'us'):   # inHg
+        elif (u == 'inhg'):   # inHg
             self.drivers[0]['uom'] = 23
             self.drivers[1]['uom'] = 23
             self.id = 'pressureUS'
@@ -95,7 +91,7 @@ class PressureNode(polyinterface.Node):
     # We want to override the SetDriver method so that we can properly
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
-        if (self.units == 'us' and driver != 'GV1' ):
+        if (self.units == 'inhg' and driver != 'GV1' ):
             value = round(value * 0.02952998751, 3)
         super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 

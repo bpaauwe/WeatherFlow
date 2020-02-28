@@ -55,6 +55,14 @@ class Controller(polyinterface.Controller):
         self.poly.onStop(self.my_stop)
         self.devices = []
         self.discovered = ""
+        self.units = {
+                'temperature': 'c',
+                'wind': 'kph',
+                'pressure': 'mb',
+                'rain': 'mm',
+                'distance': 'km',
+                'other': 'metric',
+                }
         self.params = node_funcs.NSParameters([{
             'name': 'Station',
             'default': 'set me',
@@ -131,6 +139,10 @@ class Controller(polyinterface.Controller):
             LOGGER.info('no station defined, skipping lookup.')
             return
 
+        air_found = False
+        sky_found = False
+        tempest_found = False
+
         self.devices = []  # clear the devcies array
         path_str = '/swd/rest/stations/'
         path_str += self.params.get('Station')
@@ -154,16 +166,19 @@ class Controller(polyinterface.Controller):
                         if device['serial_number'] not in self.devices:
                             self.devices.append(device['serial_number'])
 
-                        if device['device_type'] == 'AR':
+                        if device['device_type'] == 'AR' and not air_found:
                             self.params.set('Air S/N', device['serial_number'])
                             self.params.set('AGL', float(device['device_meta']['agl']))
+                            air_found = True
                             self.Tempest = False
-                        elif device['device_type'] == 'ST':
+                        elif device['device_type'] == 'ST' and not tempest_found:
                             self.params.set('Tempest S/N', device['serial_number'])
                             self.params.set('AGL', float(device['device_meta']['agl']))
+                            tempest_found = True
                             self.Tempest = True
-                        elif device['device_type'] == 'SK':
+                        elif device['device_type'] == 'SK' and not sky_found:
                             self.params.set('Sky S/N', device['serial_number'])
+                            sky_found = True
                             self.Tempest = False
 
 
@@ -185,6 +200,13 @@ class Controller(polyinterface.Controller):
             # if dist in miles & temp in F == US
             # if dist in miles & temp in C == UK
             # else == metric
+            self.units['temperature'] = awdata['station_units']['units_temp']
+            self.units['wind'] = awdata['station_units']['units_wind']
+            self.units['rain'] = awdata['station_units']['units_precip']
+            self.units['pressure'] = awdata['station_units']['units_pressure']
+            self.units['distance'] = awdata['station_units']['units_distance']
+            self.units['other'] = awdata['station_units']['units_other']
+
             temp_unit = awdata['station_units']['units_temp']
             dist_unit = awdata['station_units']['units_distance']
 
@@ -282,26 +304,26 @@ class Controller(polyinterface.Controller):
         self.discovered = self.params.get('Station')
 
         node = temperature.TemperatureNode(self, self.address, 'temperature', 'Temperatures')
-        node.SetUnits(self.params.get('Units'))
+        node.SetUnits(self.units['temperature'])
         self.addNode(node)
 
         node = humidity.HumidityNode(self, self.address, 'humidity', 'Humidity')
         node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = pressure.PressureNode(self, self.address, 'pressure', 'Barometric Pressure')
-        node.SetUnits(self.params.get('Units'))
+        node.SetUnits(self.units['pressure'])
         self.addNode(node)
         node = wind.WindNode(self, self.address, 'wind', 'Wind')
-        node.SetUnits(self.params.get('Units'))
+        node.SetUnits(self.units['wind'])
         self.addNode(node)
         node = rain.PrecipitationNode(self, self.address, 'rain', 'Precipitation')
-        node.SetUnits(self.params.get('Units'))
+        node.SetUnits(self.units['rain'])
         self.addNode(node)
         node = light.LightNode(self, self.address, 'light', 'Illumination')
         node.SetUnits(self.params.get('Units'))
         self.addNode(node)
         node = lightning.LightningNode(self, self.address, 'lightning', 'Lightning')
-        node.SetUnits(self.params.get('Units'))
+        node.SetUnits(self.units['distance'])
         self.addNode(node)
 
         # TODO: Add hub node with battery and rssi (and sensor status?) info
@@ -394,6 +416,7 @@ class Controller(polyinterface.Controller):
         else:
             units = 'metric'
 
+
         return units
 
     def check_params(self):
@@ -402,6 +425,29 @@ class Controller(polyinterface.Controller):
         if self.params.get_from_polyglot(self):
             LOGGER.debug('All required parameters are set!')
             self.configured = True
+
+            if self.params.get('Units') == 'us':
+                self.units['temperature'] = 'f'
+                self.units['wind'] = 'mph'
+                self.units['rain'] = 'in'
+                self.units['pressure'] = 'inhg'
+                self.units['distance'] = 'mi'
+                self.units['other'] = 'imperial'
+            elif self.params.get('Units') == 'uk':
+                self.units['temperature'] = 'c'
+                self.units['wind'] = 'mph'
+                self.units['rain'] = 'in'
+                self.units['pressure'] = 'mb'
+                self.units['distance'] = 'mi'
+                self.units['other'] = 'imperial'
+            else:
+                self.units['temperature'] = 'c'
+                self.units['wind'] = 'kph'
+                self.units['rain'] = 'mm'
+                self.units['pressure'] = 'mb'
+                self.units['distance'] = 'km'
+                self.units['other'] = 'metric'
+
         else:
             LOGGER.debug('Configuration required.')
             LOGGER.debug('Station = ' + self.params.get('Station'))
