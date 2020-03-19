@@ -517,6 +517,8 @@ class Controller(polyinterface.Controller):
                 LOGGER.debug('Duplicate AIR observations, ignorning')
                 return air_tm
 
+            LOGGER.debug(data)
+
             air_tm = tm
             sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
             trend = self.nodes['pressure'].updateTrend(p)
@@ -540,14 +542,16 @@ class Controller(polyinterface.Controller):
                 #self.setDriver('GV0', data['obs'][0][6], report=True, force=True)
             except Exception as e:
                 LOGGER.error('Failed to update sky battery voltage: ' + str(e))
-        except:
-            LOGGER.error('Failure in processing AIR data')
+        except Exception as e:
+            LOGGER.error('Failure in processing AIR data: ' + str(e))
 
         return air_tm
 
     def sky_data(self, data, sky_tm):
         # process sky data
         try:
+            LOGGER.debug(data)
+
             tm = data['obs'][0][0]  # epoch
             il = data['obs'][0][1]  # Illumination
             uv = data['obs'][0][2]  # UV Index
@@ -590,13 +594,15 @@ class Controller(polyinterface.Controller):
             except Exception as e:
                 LOGGER.error('Failed to update sky battery voltage: ' + str(e))
 
-        except:
-            LOGGER.error('Failure in SKY data')
+        except Exception as e:
+            LOGGER.error('Failure in SKY data: ' + str(e))
 
         return sky_tm
 
     def tempest_data(self, data, st_tm):
         try:
+            LOGGER.debug(data)
+
             tm = data['obs'][0][0]  # ts
             # convert wind speed from m/s to kph
             if (data['obs'][0][1] is not None):
@@ -649,8 +655,8 @@ class Controller(polyinterface.Controller):
             self.nodes['hub'].update(data['obs'][0][16], None)
             #self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
 
-        except:
-            LOGGER.error('Failure in TEMPEST data')
+        except Exception as e:
+            LOGGER.error('Failure in TEMPEST data: ' + str(e))
 
         return st_tm
 
