@@ -177,10 +177,12 @@ class Controller(polyinterface.Controller):
                             self.params.set('AGL', float(device['device_meta']['agl']))
                             tempest_found = True
                             self.Tempest = True
+                            device_id = device['device_id']
                         elif device['device_type'] == 'SK' and not sky_found:
                             self.params.set('Sky S/N', device['serial_number'])
                             sky_found = True
                             self.Tempest = False
+                            device_id = device['device_id']
 
 
                 else:
@@ -229,13 +231,92 @@ class Controller(polyinterface.Controller):
             # obs is array of dictionaries. Array index 0 is what we want
             # to get current daily and yesterday daily rainfall values
 
-            LOGGER.info('daily rainfall = %f' %
-                    awdata['obs'][0]['precip_accum_local_day'])
-            LOGGER.info('yesterday rainfall = %f' %
-                    awdata['obs'][0]['precip_accum_local_yesterday'])
+            d_rain = awdata['obs'][0]['precip_accum_local_day']
+            LOGGER.info('daily rainfall = %f' % d_rain)
+            p_rain = awdata['obs'][0]['precip_accum_local_yesterday']
+            LOGGER.info('yesterday rainfall = %f' % p_rain)
             c.close()
 
+            # Do month by month query of rain info.
+            today = datetime.datetime.today()
+            y_rain = 0
+            for month in range(1,today.month+1):
+                m_rain = 0
+                # get epoch time for start of month and end of month
+                datem = datetime.datetime(today.year, month, 1)
+                start_date = datem.replace(day=1)
+                #end_date = datem.replace(month=(month+1 % 12), day=1) - datetime.timedelta(days=1)
+                end_date = datem.replace(month=(month+1 % 12), day=1)
+
+                # make request:
+                #  /swd/rest/observations/device/<id>?time_start=start&time_end=end&api_key=
+                path_str = '/swd/rest/observations/device/'
+                path_str += str(device_id) + '?'
+                path_str += 'time_start=' + str(int(start_date.timestamp()))
+                path_str += '&time_end=' + str(int(end_date.timestamp()))
+                path_str += '&api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
+
+                LOGGER.info('path = ' + path_str)
+
+                c = http.request('GET', path_str)
+                awdata = json.loads(c.data.decode('utf-8'))
+
+                # we should now have an array of observations
+                for obs in awdata['obs']:
+                    # for sky, index 3 is daily rain.  for tempest it is index 12
+                    if sky_found:
+                        m_rain += obs[3]
+                        y_rain += obs[3]
+                    elif tempest_found:
+                        m_rain += obs[12]
+                        y_rain += obs[12]
+
+                LOGGER.info('Month ' + str(month) + ' had rain = ' + str(m_rain))
+
+                c.close()
+            LOGGER.info('yearly rain total = ' + str(y_rain))
+
+            # Need to do a separate query for weekly rain
+            start_date = today - datetime.timedelta(days=7)
+            end_date = today
+            path_str = '/swd/rest/observations/device/'
+            path_str += str(device_id) + '?'
+            path_str += 'time_start=' + str(int(start_date.timestamp()))
+            path_str += '&time_end=' + str(int(end_date.timestamp()))
+            path_str += '&api_key=6c8c96f9-e561-43dd-b173-5198d8797e0a'
+
+            LOGGER.info('path = ' + path_str)
+
+            c = http.request('GET', path_str)
+            awdata = json.loads(c.data.decode('utf-8'))
+            w_rain = 0
+            for obs in awdata['obs']:
+                if sky_found:
+                    w_rain += obs[3]
+                elif tempest_found:
+                    w_rain += obs[12]
+
+            c.close()
+            LOGGER.info('weekly rain total = ' + str(w_rain))
+
             http.close()
+
+            if y_rain > 0:
+                self.rain_data['yearly'] = y_rain
+                self.rain_data['year'] = datetime.datetime.now().year
+            if m_rain > 0:
+                self.rain_data['monthly'] = m_rain
+                self.rain_data['month'] = datetime.datetime.now().month
+            if w_rain > 0:
+                self.rain_data['weekly'] = w_rain
+                self.rain_data['week'] = datetime.datetime.now().isocalendar()[1]
+            if d_rain > 0:
+                self.rain_data['daily'] = d_rain
+                self.rain_data['day'] = datetime.datetime.now().day
+            if p_rain > 0:
+                self.rain_data['yesterday'] = p_rain
+
+            self.rain_data['hourly'] = 0
 
             self.params.save_params(self)
         except Exception as e:
