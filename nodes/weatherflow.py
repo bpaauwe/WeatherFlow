@@ -601,7 +601,8 @@ class Controller(polyinterface.Controller):
             LOGGER.debug(data)
 
             air_tm = tm
-            sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
+            el = float(self.params.get('Elevation')) + float(self.params.get('AGL'))
+            sl = self.nodes['pressure'].toSeaLevel(p, el)
             trend = self.nodes['pressure'].updateTrend(p)
             self.nodes['pressure'].update(p, sl, trend)
             try:
@@ -720,7 +721,8 @@ class Controller(polyinterface.Controller):
 
             st_tm = tm
 
-            sl = self.nodes['pressure'].toSeaLevel(p, self.params.get('Elevation') + self.params.get('AGL'))
+            el = float(self.params.get('Elevation')) + float(self.params.get('AGL'))
+            sl = self.nodes['pressure'].toSeaLevel(p, el)
             trend = self.nodes['pressure'].updateTrend(p)
             fl = self.nodes['temperature'].ApparentTemp(t, ws, h)
             dp = self.nodes['temperature'].Dewpoint(t, h)
