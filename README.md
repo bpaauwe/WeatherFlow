@@ -67,6 +67,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.6 05/09/2020
+  - Add some details to the data processing exceptions.
+  - Force pressure calculations to use floating values always.
 - 2.0.5 03/20/2020
   - Pull rainfall data from WeatherFlow server on startup.
 - 2.0.4 03/19/2020
