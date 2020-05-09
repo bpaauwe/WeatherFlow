@@ -124,7 +124,7 @@ class Controller(polyinterface.Controller):
             LOGGER.debug('-- configuration is valid')
             self.removeNoticesAll()
             self.configured = True
-            if self.params.isSet('Station') and (self.discovered != "") and (self.discoverd != self.params.get('Station')):
+            if self.params.isSet('Station') and (self.discovered != "") and (self.discovered != self.params.get('Station')):
                 self.discover()
         elif valid:
             LOGGER.debug('-- configuration not changed, but is valid')
