@@ -49,13 +49,22 @@ class PressureNode(polyinterface.Node):
         s = 1013.35 # pressure at sealevel
         n = 288.15  # sea level temperature
 
-        l = a / (i * r)
+        el = elevation * 1.0
+        st = station * 1.0
 
-        c = i * r / a
+        try:
+            l = a / (i * r)
 
-        u = math.pow(1 + math.pow(s / station, c) * (r * elevation / n), l)
+            c = i * r / a
 
-        return (round((station * u), 3))
+            u = math.pow(1 + math.pow(s / st, c) * (r * el / n), l)
+
+            slp = (round((st * u), 3))
+        except Exception as e:
+            LOGGER.error('Pressure conversion failed: ' + str(e.msg))
+            slp = station
+
+        return slp
 
     # track pressures in a queue and calculate trend
     def updateTrend(self, current):
