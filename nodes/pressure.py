@@ -49,6 +49,9 @@ class PressureNode(polyinterface.Node):
         s = 1013.35 # pressure at sealevel
         n = 288.15  # sea level temperature
 
+        if station is None:
+            return 0
+
         el = elevation * 1.0
         st = station * 1.0
 
@@ -85,15 +88,18 @@ class PressureNode(polyinterface.Node):
             past = self.mytrend[-1]
 
         # calculate trend
-        LOGGER.info('TREND %f to %f' % (past, current))
-        if ((past - current) > 1):
-            t = 0 # Falling
-        elif ((past - current) < -1):
-            t = 2 # Rising
+        try:
+            LOGGER.info('TREND %f to %f' % (past, current))
+            if ((past - current) > 1):
+                t = 0 # Falling
+            elif ((past - current) < -1):
+                t = 2 # Rising
 
-        # inserts the value at index 0 and bumps all existing entries
-        # up by one index
-        self.mytrend.insert(0, current)
+            # inserts the value at index 0 and bumps all existing entries
+            # up by one index
+            self.mytrend.insert(0, current)
+        except:
+            LOGGER.error('Pressure value invalid. Trend not calculated.')
 
         return t
 

@@ -625,7 +625,7 @@ class Controller(polyinterface.Controller):
             except Exception as e:
                 LOGGER.error('Failed to update sky battery voltage: ' + str(e))
         except Exception as e:
-            tb = sys.exec_info()
+            (t, v, tb) = sys.exec_info()
             LOGGER.error('Failure in processing AIR data: ' + str(e))
             LOGGER.error('  At: ' + str(tb.tb_lineno));
 
@@ -679,7 +679,7 @@ class Controller(polyinterface.Controller):
                 LOGGER.error('Failed to update sky battery voltage: ' + str(e))
 
         except Exception as e:
-            tb = sys.exec_info()
+            (t, v, tb) = sys.exec_info()
             LOGGER.error('Failure in SKY data: ' + str(e))
             LOGGER.error('  At: ' + str(tb.tb_lineno));
 
@@ -743,7 +743,7 @@ class Controller(polyinterface.Controller):
             #self.setDriver('GV0', data['obs'][0][16], report=True, force=True)
 
         except Exception as e:
-            tb = sys.exec_info()
+            (t, v, tb) = sys.exec_info()
             LOGGER.error('Failure in TEMPEST data: ' + str(e))
             LOGGER.error('  At: ' + str(tb.tb_lineno));
 
