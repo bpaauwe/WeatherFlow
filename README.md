@@ -67,6 +67,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.7 06/23/2020
+  - Handle missing pressure value.
 - 2.0.6 05/09/2020
   - Add some details to the data processing exceptions.
   - Force pressure calculations to use floating values always.
