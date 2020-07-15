@@ -106,9 +106,10 @@ class PressureNode(polyinterface.Node):
     # We want to override the SetDriver method so that we can properly
     # convert the units based on the user preference.
     def setDriver(self, driver, value):
-        if (self.units == 'inhg' and driver != 'GV1' ):
-            value = round(value * 0.02952998751, 3)
-        super(PressureNode, self).setDriver(driver, value, report=True, force=True)
+        if (value is not None):
+            if (self.units == 'inhg' and driver != 'GV1' ):
+                value = round(value * 0.02952998751, 3)
+            super(PressureNode, self).setDriver(driver, value, report=True, force=True)
 
     def update(self, p, sl, trend):
         self.setDriver('ST', p)
