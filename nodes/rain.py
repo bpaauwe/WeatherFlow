@@ -172,5 +172,7 @@ class PrecipitationNode(polyinterface.Node):
     def setDriver(self, driver, value):
         if (self.units == 'in'):
             value = round(value * 0.03937, 2)
+        else:
+            value = round(value, 3)
         super(PrecipitationNode, self).setDriver(driver, value, report=True, force=True)
 
