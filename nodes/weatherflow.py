@@ -163,6 +163,10 @@ class Controller(polyinterface.Controller):
                     LOGGER.debug(station['devices'])
                     self.params.set('Elevation', float(station['station_meta']['elevation']))
                     for device in station['devices']:
+                        if 'serial_number' not in device:
+                            LOGGER.error('Bad device record for device ID ' + str(device['device_id']))
+                            continue
+
                         LOGGER.info('  ' + device['serial_number'] + ' -- ' + device['device_type'])
                         if device['serial_number'] not in self.devices:
                             self.devices.append(device['serial_number'])
