@@ -67,6 +67,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.9 07/21/2020
+  - Round values to 3 decimal places when doing metric conversions.
+  - Skip bad/corrupt device records when querying WF server.
 - 2.0.8 07/15/2020
   - Handle pressure value being none
 - 2.0.7 06/23/2020
