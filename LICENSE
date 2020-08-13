@@ -1,21 +1,166 @@
-MIT License
+SOFTWARE LICENSE AGREEMENT
 
-Copyright (c) 2018
+DO NOT DOWNLOAD, INSTALL, ACCESS, COPY, OR USE ANY PORTION OF THE SOFTWARE
+UNTIL YOU HAVE READ AND ACCEPTED THE TERMS AND CONDITIONS OF THIS AGREEMENT.
+BY INSTALLING, COPYING, ACCESSING, OR USING THE SOFTWARE, YOU AGREE TO BE
+LEGALLY BOUND BY THE TERMS AND CONDITIONS OF THIS AGREEMENT. If You do not
+agree to be bound by, or the entity for whose benefit You act has not
+authorized You to accept, these terms and conditions, do not install, access,
+copy, or use the Software and destroy all copies of the Software in your
+possession.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This SOFTWARE LICENSE AGREEMENT (this “Agreement”) is entered into between
+Bobsplace Media Engineering ("BME") and Licensor. “Licensor” refers to you or
+your employer or other entity for whose benefit you act, as applicable. If you
+are agreeing to the terms and conditions of this Agreement on behalf of a
+company or other legal entity, you represent and warrant that you have the
+legal authority to bind that legal entity to the Agreement, in which case,
+"Licensor" shall be in reference to such entity. BME and Licensor are referred
+to herein individually as a “Party” or, together, as the “Parties”.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The Parties, in consideration of the mutual covenants contained in this
+Agreement, and for other good and valuable consideration, the receipt and
+sufficiency of which they acknowledge, and intending to be legally bound,
+agree as follows:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+1. GRANT OF LICENSE
+Subject to the terms and conditions of the Agreement, BME grants to Licensor a
+non-exclusive, non-transferable license to install use the software. Licensor
+may use the Licensed Programs in executable format for its own use, and may
+translate or modify the licensed programs or incorporate them into other
+software. Licensor may not, however, transfer or sublicense the Licensed
+Programs to any third party, in whole or in part, in any form, whether modified
+or unmodified.
+
+2. COPIES
+Licensee may make copies of the Licensed Program in executable code form as
+necessary for use by Licensee and for backup or archive purposes. Licensee
+agrees to maintain records of the location and use of each copy, in whole or
+in part, of the Licensed Programs. Each Licensed Program is copyrighted but
+unpublished by BME. Licensee agrees to reproduce and apply the copyright notice
+and proprietary notice of BME to all copies made hereunder, in whole or in part
+and in any form, of Licensed Programs.
+ 
+3. OWNERSHIP
+The original and any copies of the Licensed Programs, made by Licensee,
+including translations, compilations, partial copies, modifications, and
+updates, are the property of BME.
+
+4. PROPRIETARY RIGHTS
+Licensee recognizes that BME regards the Licensed Programs as its proprietary
+information and as confidential trade secrets of great value. Licensee agrees
+not to provide or to otherwise make available in any form the Licensed
+Programs, or any portion thereof, to any person other than employees of
+Licensee without the prior written consent of BME. Licensee further agrees to
+treat the Licensed Programs with at least the same degree of care with which
+Licensee treats its own confidential information and in no event with less
+care than is reasonably required to protect the confidentiality of the Licensed
+Programs.
+
+5. TERM
+The license granted hereunder shall continue unless and until terminated
+pursuant to Section 7 hereof and subject to Licensee's proper performance of
+its obligations hereunder.
+
+6. TERMINATION
+BME may terminate this Agreement if Licensee is in default of any of the terms
+and conditions of this Agreement and fails to correct such default within ten
+(10) days after written notice thereof from BME.
+
+7. TERMINATION CERTIFICATE
+In the event of termination, Licensee will immediately discontinue use of the
+Licensed Programs. Within one (1) month after termination of this Agreement,
+Licensee will furnish to BME a certificate which certifies with respect to each
+of the Licensed Programs that, through its best effort and to the best of its
+knowledge, the original and all copies, in whole or in part and in any form, of
+each of the Licensed Programs have been destroyed. The provisions of Sections
+3, 4, 7, 8, and 10 hereof shall survive any termination of this Agreement.
+
+8. WARRANTY DISCLAIMER
+BME licenses, and Licensee accepts, the licensed programs "AS IS." BME PROVIDES
+NO WARRANTIES AS TO THE FUNCTION OR USE OF THE LICENSED PROGRAMS, WHETHER
+EXPRESS, IMPLIED, OR STATUTORY, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR PARTICULAR PURPOSE. THE ENTIRE
+RISK AS TO THE QUALITY AND PERFORMANCE OF THE LICENSED PROGRAM IS WITH
+LICENSEE. LICENSOR DOES NOT WARRANT THAT THE FUNCTIONS CONTAINED IN THE
+LICENSED PROGRAMS WILL MEET LICENSEE'S REQUIREMENTS OR THAT THE OPERATION OF
+THE LICENSED PROGRAMS WILL BE UNINTERRUPTED OR ERROR FREE.
+
+9. PATENT AND COPYRIGHT INDEMNITY
+In the event that a legal action is brought against Licensor to the extent
+that it is based on a claim that the Software infringes a U.S. patent or
+copyright of a third party, BME shall provide Licensor with legal defense at
+its own expense and pay for costs and damages awarded against Licensor in such
+action or agreed to under a settlement, provided that: (i) Licensor promptly
+provides BME with a written notice of such legal action; (ii) Licensor grants
+BME complete authority over the legal defense and settlement negotiations;
+(iii) Licensor fully cooperates with BME with respect to such legal action; and
+(iv) no settlement with respect to such legal action shall be made without
+BME’s prior written approval. 
+
+Notwithstanding the above, BME shall have no liability to defend and pay for
+any action pertaining to an infringement of intellectual property rights to
+the extent that the action: (i) is based on a modification of the Software
+modified not by BME; (ii) results from Licensor’s failure to use an updated
+version of the Software; (iii) is based on a combination or use of the Software
+with any software, program or device, including without limitation software
+licensed under the terms of applicable open source licenses, not provided or
+approved by BME; (iv) results from Licensor’s use of the Software following
+the termination of the Agreement.
+
+THIS SECTION STATES BME’S SOLE AND EXCLUSIVE LIABILITY, AND LICENSOR’S
+SOLE AND EXCLUSIVE REMEDY, WITH RESPECT TO AN INFRINGEMENT OF INTELLECTUAL
+PROPERTY RIGHTS OF ANY KIND.
+
+10. LIMITATION OF LIABILITY
+BME'S LIABILITY TO LICENSEE UNDER ANY PROVISIONS OF THIS AGREEMENT FOR DAMAGES
+FINALLY AWARDED SHALL BE LIMITED TO THE AMOUNTS ACTUALLY PAID HEREUNDER BY
+LICENSEE TO BME. IN NO EVENT SHALL BME BE LIABLE FOR INDIRECT, INCIDENTAL,
+SPECIAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOSS OF USE, LOSS OF PROFITS OR
+INTERRUPTION OF BUSINESS, HOWEVER CAUSED OR ON ANY THEORY OF LIABILITY.
+
+11. NOTICES
+All notices in connection with this Agreement shall be in writing and may be
+given by certified, registered, or first class mail or personally delivered at
+the address set forth on the front page. For purposes of this Agreement, a
+notice shall be deemed effective upon personal delivery to the party or if by
+mail five days after proper deposit in a mail box.
+
+12. SUCCESSORS
+This Agreement will be binding upon and will inure to the benefit of the
+parties hereto and their respective representatives, successors and assigns
+except as otherwise provided herein.
+
+13. SEVERABILITY
+In the event any provision of this Agreement is determined to be invalid or
+unenforceable, the remainder of this Agreement shall remain in force as if
+such provision were not a part.
+
+14. GOVERNING LAW/FORUM
+This Agreement shall be governed and interpreted by the laws of the State of
+California. Eldorado County, California shall be the appropriate venue and
+jurisdiction for the resolution of any disputes hereunder. Both parties hereby
+consent to such personal and exclusive jurisdiction.
+
+15. NON-ASSIGNMENT
+This Agreement and the licenses granted by it may not be assigned, sublicensed,
+or otherwise transferred by Licensee without the prior written consent of BME. 
+
+16. EXPORT REGULATIONS
+Licensee understands that BME is subject to regulation by agencies of the U.S.
+Government, including the U.S. Departments of Commerce and State, which
+prohibit export or diversion of certain technical products to certain
+countries. Licensee warrants that it will comply in all respect with the
+export and re-export restrictions set forth in the export license for the
+Licensed Programs and all other applicable export regulations. Licensee agrees
+to indemnify and hold BME harmless from any loss, damages, liability or
+expenses incurred by BME as a result of Licensee's failure to comply with any
+export regulations or restrictions.
+
+17. ENTIRE AGREEMENT
+This Agreement sets forth the entire understanding between the parties with
+respect to the subject matter hereof, and merges and supersedes all prior
+agreements, discussions and understandings, express or implied, concerning
+such matters. This Agreement shall take precedence over any additional or
+conflicting terms which may be contained in Licensee's purchase order or BME's
+order acknowledgment forms.
