@@ -67,6 +67,9 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.10 02/26/2021
+  - Add error checks to weekly/monthly rain
+  - Add editor for lightning strikes
 - 2.0.9 07/21/2020
   - Round values to 3 decimal places when doing metric conversions.
   - Skip bad/corrupt device records when querying WF server.
