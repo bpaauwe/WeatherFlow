@@ -13,8 +13,8 @@
     	{
     		"title": "WeatherFlow: A node server for WeatherFlow",
     		"author": "Bob Paauwe",
-    		"version": "2.0.10",
-    		"date": "February 26, 2021",
+    		"version": "2.0.11",
+    		"date": "December 17, 2021",
     		"source": "https://github.com/bpaauwe/WeatherFlow",
             "license": "https://github.com/bpaauwe/WeatherFlow/LICENSE"
 		}

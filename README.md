@@ -67,6 +67,8 @@ The WeatherFlow nodeserver keeps track of the version number and when a profile 
 
 # Release Notes
 
+- 2.0.11 12/17/2021
+  - Add SO_REUSE_PORT socket option.
 - 2.0.10 02/26/2021
   - Add error checks to weekly/monthly rain
   - Add editor for lightning strikes
